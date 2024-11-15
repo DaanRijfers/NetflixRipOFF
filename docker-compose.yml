@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  mariadb:
+    image: mariadb
+    container_name: mariadb-container
+    environment:
+      MYSQL_ROOT_PASSWORD: P@ssword123!
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-container
+    environment:
+      PMA_HOST: mariadb
+    ports:
+      - "8080:80"
+
+volumes:
+  mariadb-data:
+
