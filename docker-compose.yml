@@ -32,11 +32,7 @@ services:
     ports:
       - "80:80"
     volumes:
-<<<<<<< HEAD
-      - ./apache/www:/usr/local/apache2/htdocs
-=======
-      - ./netflixRipOff/public:/usr/local/apache2/htdocs/
->>>>>>> refs/remotes/origin/development
+      - ./apache/www:/usr/local/apache2/htdocs/  # Corrected volume mount path
     depends_on:
       - mariadb
       - laravel
@@ -60,3 +56,4 @@ services:
 
 volumes:
   mariadb-data:
+
