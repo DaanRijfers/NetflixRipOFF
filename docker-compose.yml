@@ -1,23 +1,40 @@
-version: '3'
+version: "3.9"
 
 services:
   mariadb:
-    image: mariadb
-    container_name: mariadb-container
+    image: mariadb:latest
+    container_name: netflixripoff-mariadb
+    platform: linux/amd64  # Ensure compatibility for both amd64 and arm64
     environment:
       MYSQL_ROOT_PASSWORD: P@ssword123!
+      MYSQL_DATABASE: netflixripoff
     ports:
       - "3306:3306"
     volumes:
       - mariadb-data:/var/lib/mysql
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin-container
-    environment:
-      PMA_HOST: mariadb
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: netflixripoff-phpmyadmin
+    platform: linux/amd64  # Ensure compatibility for both amd64 and arm64
     ports:
       - "8080:80"
+    environment:
+      PMA_HOST: mariadb
+      MYSQL_ROOT_PASSWORD: P@ssword123!
+    depends_on:
+      - mariadb
+
+  apache:
+    image: httpd:latest  # Use official Apache HTTP server image
+    container_name: netflixripoff-apache
+    platform: linux/amd64  # Ensure compatibility for both amd64 and arm64
+    ports:
+      - "80:80"   # Expose port 80 for web access
+    volumes:
+      - ./www:/usr/local/apache2/htdocs/  # Map local 'www' folder to Apache's web directory
+    depends_on:
+      - mariadb
 
 volumes:
   mariadb-data:
