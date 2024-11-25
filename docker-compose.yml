@@ -45,9 +45,11 @@ services:
       composer install &&
       php artisan key:generate &&
       php artisan migrate &&
+      php artisan config:clear &&
+      php artisan config:cache &&
       npm install &&
       npm run build &&
-      php artisan serve --host=127.0.0.1 --port=8000
+      php artisan serve --host=0.0.0.0 --port=8000
       "
 
 volumes:
