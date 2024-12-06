@@ -12,17 +12,17 @@ Route::post('/auth/logout', [AuthController::class, 'logout']);
 Route::post('/auth/password-reset', [AuthController::class, 'resetPassword']);
 
 // User Routes
-Route::get('/users', [UserController::class, 'index']);
-Route::get('/users/{user_id}', [UserController::class, 'show']);
-Route::put('/users/{user_id}', [UserController::class, 'update']);
-Route::delete('/users/{user_id}', [UserController::class, 'destroy']);
+Route::get('/user', [UserController::class, 'index']);
+Route::get('/user/{user_id}', [UserController::class, 'show']);
+Route::put('/user/{user_id}', [UserController::class, 'update']);
+Route::delete('/user/{user_id}', [UserController::class, 'destroy']);
 
 // Profile Routes
-Route::get('/users/{user_id}/profiles', [ProfileController::class, 'index']);
-Route::post('/users/{user_id}/profiles', [ProfileController::class, 'store']);
-Route::get('/users/{user_id}/profiles/{profile_id}', [ProfileController::class, 'show']);
-Route::put('/users/{user_id}/profiles/{profile_id}', [ProfileController::class, 'update']);
-Route::delete('/users/{user_id}/profiles/{profile_id}', [ProfileController::class, 'destroy']);
+Route::get('/profile', [ProfileController::class, 'index']);
+Route::post('/profile', [ProfileController::class, 'store']);
+Route::get('/profile/{profile_id}', [ProfileController::class, 'show']);
+Route::put('/profile/{profile_id}', [ProfileController::class, 'update']);
+Route::delete('/profile/{profile_id}', [ProfileController::class, 'destroy']);
 
 // Content Routes
 Route::get('/content', [ContentController::class, 'index']);
@@ -31,8 +31,7 @@ Route::get('/content/recommendations', [ContentController::class, 'recommendatio
 Route::get('/content/search', [ContentController::class, 'search']);
 
 // Subscription Routes
-Route::get('/subscriptions', [SubscriptionController::class, 'index']);
-Route::post('/subscriptions', [SubscriptionController::class, 'store']);
-Route::put('/subscriptions/{subscription_id}', [SubscriptionController::class, 'update']);
-Route::delete('/subscriptions/{subscription_id}', [SubscriptionController::class, 'destroy']);
-
+Route::get('/subscription', [SubscriptionController::class, 'index']);
+Route::post('/subscription', [SubscriptionController::class, 'store']);
+Route::put('/subscription/{subscription_id}', [SubscriptionController::class, 'update']);
+Route::delete('/subscription/{subscription_id}', [SubscriptionController::class, 'destroy']);
