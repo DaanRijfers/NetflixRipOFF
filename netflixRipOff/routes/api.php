@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
 
 // Auth Routes
 Route::post('/auth/register', [AuthController::class, 'register']);
