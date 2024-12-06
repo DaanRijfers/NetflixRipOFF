@@ -40,6 +40,8 @@ services:
       - "8000:8000"
     volumes:
       - ./netflixRipOff:/var/www/html:z
+    depends_on:
+      - mariadb
     command: >
       sh /var/www/html/entrypoint.sh
 
