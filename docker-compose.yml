@@ -43,7 +43,7 @@ services:
     depends_on:
       - mariadb
     command: >
-      sh /var/www/html/entrypoint.sh
+      sh -c "/var/www/html/wait-for-it.sh mariadb:3306 -- /var/www/html/entrypoint.sh"
 
 volumes:
   mariadb-data:
