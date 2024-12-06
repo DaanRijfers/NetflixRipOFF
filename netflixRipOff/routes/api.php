@@ -1,4 +1,9 @@
-// routes/api.php
+<?php
+// Controllers
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\ContentController;
+use App\Http\Controllers\UserController;
 
 // Auth Routes
 Route::post('/auth/register', [AuthController::class, 'register']);
