@@ -24,6 +24,7 @@ Route::post('/profile', [ProfileController::class, 'store']);
 Route::get('/profile/{profile_id}', [ProfileController::class, 'show']);
 Route::put('/profile/{profile_id}', [ProfileController::class, 'update']);
 Route::delete('/profile/{profile_id}', [ProfileController::class, 'destroy']);
+Route::middleware('auth:sanctum')->get('/profile', [ProfileController::class, 'index']);
 
 // Content Routes
 Route::get('/content', [ContentController::class, 'index']);

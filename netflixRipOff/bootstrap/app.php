@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // Add more routes here, we're gonna need it for testing
+        $middleware->validateCsrfTokens(except: [
+            "/auth/*"
+        ]);
+
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
