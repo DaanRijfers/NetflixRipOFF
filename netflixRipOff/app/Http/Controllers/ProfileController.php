@@ -10,14 +10,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Profile;
 
 class ProfileController extends Controller
 {
-    public function index(Request $request): Response
+    public function index()
     {
-        return Inertia::render('Profile/Index', [
-            'user' => $request->user(),
-        ]);
+        return response()->json(Profile::all());
     }
     /**
      * Display the user's profile form.
