@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Role;
+use Illuminate\Support\Facades\DB;
 
 class RoleSeeder extends Seeder
 {
@@ -12,13 +13,9 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        // Check if the roles already exist
-        if (Role::where('name', 'Admin')->doesntExist()) {
-            Role::create(['name' => 'Admin']);
-        }
-
-        if (Role::where('name', 'User')->doesntExist()) {
-            Role::create(['name' => 'User']);
-        }
+        DB::table('roles')->insert([
+            ['id' => 1, 'name' => 'Admin'],
+            ['id' => 2, 'name' => 'User'],
+        ]);        
     }
 }

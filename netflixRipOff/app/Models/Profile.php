@@ -11,9 +11,10 @@ class Profile extends Model
 
     protected $fillable = [
         'user_id',
+        'name',
         'profile_picture_path',
-        'is_child_locked',
-        'description_id',
+        'date_of_birth',
+        'language_id',
     ];
 
     public function user()
@@ -21,18 +22,28 @@ class Profile extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function description()
+    public function watchlist()
     {
-        return $this->belongsTo(ContentPreference::class, 'description_id');
+        return $this->hasMany(Watchlist::class);
     }
 
-    public function watchtime()
+    public function history()
     {
-        return $this->hasMany(ProfileWatchtime::class);
+        return $this->hasMany(ProfileHistory::class);
     }
 
-    public function preferences()
+    public function genrePreferences()
     {
-        return $this->hasMany(ProfilePreference::class);
+        return $this->belongsToMany(Genre::class, 'profile_genre_preference');
+    }
+
+    public function categoryPreferences()
+    {
+        return $this->belongsToMany(Category::class, 'profile_category_preference');
+    }
+
+    public function restrictionPreferences()
+    {
+        return $this->belongsToMany(Restriction::class, 'profile_restriction_preference');
     }
 }

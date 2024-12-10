@@ -14,23 +14,9 @@ class User extends Authenticatable
         'email',
         'password',
         'payment_method',
-        'is_blocked',
+        'failed_login_attempts',
         'subscription_id',
     ];
-
-    protected $hidden = [
-        'password',
-    ];
-
-    public function setPasswordAttribute($value)
-    {
-        $this->attributes['password'] = bcrypt($value);
-    }
-
-    public function roles()
-    {
-        return $this->belongsToMany(Role::class, 'role_user');
-    }
 
     public function profiles()
     {
@@ -40,5 +26,10 @@ class User extends Authenticatable
     public function subscription()
     {
         return $this->belongsTo(Subscription::class);
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'user_roles');
     }
 }

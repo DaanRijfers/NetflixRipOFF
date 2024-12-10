@@ -9,10 +9,18 @@ class Subscription extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['price', 'quality'];
+    protected $fillable = [
+        'price',
+        'quality_id',
+    ];
 
     public function users()
     {
         return $this->hasMany(User::class);
+    }
+
+    public function quality()
+    {
+        return $this->belongsTo(Quality::class);
     }
 }
