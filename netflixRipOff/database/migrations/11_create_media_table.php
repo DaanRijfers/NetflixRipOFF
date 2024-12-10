@@ -17,13 +17,15 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->date('release_date')->nullable();
             $table->integer('duration')->nullable();
-            $table->enum('media_type', ['movie', 'series']);
+            $table->foreignId('media_type_id')
+                  ->constrained('media_types')
+                  ->onDelete('cascade');
             $table->string('series_title')->nullable();
             $table->integer('season_number')->nullable();
             $table->integer('episode_number')->nullable();
             $table->foreignId('language_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamps();
-        });                   
+        });
     }
 
     /**

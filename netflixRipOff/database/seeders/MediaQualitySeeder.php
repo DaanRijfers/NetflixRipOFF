@@ -15,6 +15,7 @@ class MediaQualitySeeder extends Seeder
     public function run(): void
     {
         Media::all()->each(function ($media) {
+            // Generate 1–3 random qualities
             $qualities = Quality::inRandomOrder()->take(rand(1, 3))->get();
 
             foreach ($qualities as $quality) {

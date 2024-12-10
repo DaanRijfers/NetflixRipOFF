@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
             'qualities' => QualitySeeder::class,
             'subscriptions' => SubscriptionSeeder::class,
             'roles' => RoleSeeder::class,
-            'categories' => CategorySeeder::class,
+            'media_types' => MediaTypeSeeder::class,
             'genres' => GenreSeeder::class,
             'restrictions' => RestrictionSeeder::class,
             'languages' => LanguageSeeder::class,
@@ -26,10 +26,8 @@ class DatabaseSeeder extends Seeder
             'media' => MediaSeeder::class,
             'watchlists' => WatchlistSeeder::class,
             'profile_histories' => ProfileHistorySeeder::class,
-            'media_categories' => MediaCategorySeeder::class,
             'media_genres' => MediaGenreSeeder::class,
             'media_restrictions' => MediaRestrictionSeeder::class,
-            'profile_category_preferences' => ProfileCategoryPreferenceSeeder::class,
             'profile_genre_preferences' => ProfileGenrePreferenceSeeder::class,
             'profile_restriction_preferences' => ProfileRestrictionPreferenceSeeder::class,
             'user_invitations' => UserInvitationSeeder::class,
@@ -48,12 +46,10 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call([
-            MostWatchedMediaViewSeeder::class,
-            ProfilesWithMostWatchlistItemsViewSeeder::class,
-            ActiveUsersByMediaConsumptionViewSeeder::class,
+            MediaWithDetailsViewSeeder::class,
+            UserMediaQualitiesViewSeeder::class,
             MediaAvailabilityByQualityViewSeeder::class,
             SeriesWithEpisodesViewSeeder::class,
-            SubscriptionRevenueByQualityViewSeeder::class,
         ]);
 
         $this->command->info('Views created successfully.');
