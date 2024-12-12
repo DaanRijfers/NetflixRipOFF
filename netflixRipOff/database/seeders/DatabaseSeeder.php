@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
             MediaWithDetailsViewSeeder::class,
             UserMediaQualitiesViewSeeder::class,
             MediaAvailabilityByQualityViewSeeder::class,
-            // SeriesWithEpisodesViewSeeder::class, TODO: Fix SeriesWithEpisodesViewSeeder.php
+            SeriesWithEpisodesViewSeeder::class
         ]);
 
         $this->command->info('Views created successfully.');

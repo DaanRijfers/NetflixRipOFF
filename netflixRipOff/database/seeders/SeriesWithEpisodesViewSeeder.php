@@ -23,12 +23,8 @@ class SeriesWithEpisodesViewSeeder extends Seeder
                 media AS parent
             JOIN
                 media AS child ON parent.title = child.series_title
-            JOIN
-                media_types AS mt_parent ON parent.media_type_id = mt_parent.id
-            JOIN
-                media_types AS mt_child ON child.media_type_id = mt_child.id
             WHERE
-                mt_parent.name = 'series' AND mt_child.name = 'series'
+                parent.media_type = 'EPISODE' AND child.media_type = 'EPISODE'
             ORDER BY
                 series_title, season_number, episode_number;
         ");
