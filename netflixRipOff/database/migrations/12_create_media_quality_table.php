@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('qualities', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
+        Schema::create('media_qualities', function (Blueprint $table) {
+            $table->foreignId('media_id')->references('id')->on('media');
+            $table->enum('quality', ['SD', 'HD', 'UHD']);
             $table->timestamps();
-        });        
+        });
     }
 
     /**
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('qualities');
+        Schema::dropIfExists('media_qualities');
     }
 };

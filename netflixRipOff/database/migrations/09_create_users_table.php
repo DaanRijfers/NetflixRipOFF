@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('payment_method')->nullable();
             $table->integer('failed_login_attempts')->default(0);
             $table->foreignId('subscription_id')->nullable()->constrained()->onDelete('set null');
+            $table->enum('role', ['junior', 'medior', 'senior', 'system', 'user'])->default('user');
             $table->timestamps();
         });                    
     }

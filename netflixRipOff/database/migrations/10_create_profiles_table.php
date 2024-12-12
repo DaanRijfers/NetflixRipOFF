@@ -17,10 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('profile_picture_path')->nullable();
             $table->date('date_of_birth')->nullable();
-            $table->foreignId('media_preference') 
-                  ->nullable()
-                  ->constrained('media_types')
-                  ->onDelete('set null');
+            $table->enum('media_preference', ['MOVIE', 'EPISODE']);
             $table->foreignId('language_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamps();
         });

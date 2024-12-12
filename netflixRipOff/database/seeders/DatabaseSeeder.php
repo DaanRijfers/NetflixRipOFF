@@ -13,27 +13,23 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $seeders = [
-            'qualities' => QualitySeeder::class,
             'subscriptions' => SubscriptionSeeder::class,
-            'roles' => RoleSeeder::class,
-            'media_types' => MediaTypeSeeder::class,
             'genres' => GenreSeeder::class,
             'restrictions' => RestrictionSeeder::class,
             'languages' => LanguageSeeder::class,
             'users' => UserSeeder::class,
-            'user_roles' => UserRoleSeeder::class,
             'profiles' => ProfileSeeder::class,
             'media' => MediaSeeder::class,
             'watchlists' => WatchlistSeeder::class,
             'profile_histories' => ProfileHistorySeeder::class,
             'media_genres' => MediaGenreSeeder::class,
             'media_restrictions' => MediaRestrictionSeeder::class,
+            'media_qualities' => MediaQualitySeeder::class,
             'profile_genre_preferences' => ProfileGenrePreferenceSeeder::class,
             'profile_restriction_preferences' => ProfileRestrictionPreferenceSeeder::class,
             'user_invitations' => UserInvitationSeeder::class,
             'trial_periods' => TrialPeriodSeeder::class,
             'subtitles' => SubtitlesSeeder::class,
-            'media_qualities' => MediaQualitySeeder::class,
         ];
 
         foreach ($seeders as $table => $seeder) {
@@ -49,7 +45,7 @@ class DatabaseSeeder extends Seeder
             MediaWithDetailsViewSeeder::class,
             UserMediaQualitiesViewSeeder::class,
             MediaAvailabilityByQualityViewSeeder::class,
-            SeriesWithEpisodesViewSeeder::class,
+            // SeriesWithEpisodesViewSeeder::class, TODO: Fix SeriesWithEpisodesViewSeeder.php
         ]);
 
         $this->command->info('Views created successfully.');

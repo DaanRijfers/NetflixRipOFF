@@ -22,6 +22,15 @@ class UserFactory extends Factory
     {
         return $this->state([
             'email' => 'admin@admin.com',
+            'role' => 'senior'
+        ]);
+    }
+
+    public function system()
+    {
+        return $this->state([
+            'email' => 'noreply@admin.com',
+            'role' => 'system'
         ]);
     }
 }

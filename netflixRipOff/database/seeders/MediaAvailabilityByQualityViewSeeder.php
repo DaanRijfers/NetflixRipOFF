@@ -16,13 +16,11 @@ class MediaAvailabilityByQualityViewSeeder extends Seeder
             CREATE OR REPLACE VIEW media_availability_by_quality AS
             SELECT
                 media.title AS media_title,
-                qualities.name AS quality
+                media_qualities.quality AS quality
             FROM
                 media_qualities
             JOIN
                 media ON media_qualities.media_id = media.id
-            JOIN
-                qualities ON media_qualities.quality_id = qualities.id
             ORDER BY
                 media_title, quality;
         ");

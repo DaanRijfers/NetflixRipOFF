@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\MediaType;
 
 class MediaFactory extends Factory
 {
@@ -14,7 +13,7 @@ class MediaFactory extends Factory
             'description' => $this->faker->paragraph(),
             'release_date' => $this->faker->date(),
             'duration' => $this->faker->numberBetween(90, 180),
-            'media_type_id' => MediaType::inRandomOrder()->first()->id, // Assign a random valid media_type_id
+            'media_type' => $this->faker->randomElement(['MOVIE', 'EPISODE']),
             'season_number' => null,
             'episode_number' => null,
             'series_title' => null,

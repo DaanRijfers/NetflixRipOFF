@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
             $table->decimal('price', 8, 2);
-            $table->foreignId('quality_id')->constrained()->onDelete('cascade');
+            $table->enum('quality', ['SD', 'HD', 'UHD']);
             $table->timestamps();
         });             
     }

@@ -16,13 +16,11 @@ class UserMediaQualitiesViewSeeder extends Seeder
             CREATE OR REPLACE VIEW user_with_subscription AS
             SELECT
                 users.email AS user_email,
-                qualities.name AS subscription_quality
+                subscriptions.quality AS subscription_quality
             FROM
                 users
             JOIN
                 subscriptions ON users.subscription_id = subscriptions.id
-            JOIN
-                qualities ON subscriptions.quality_id = qualities.id
             ORDER BY
                 users.email;
         ");

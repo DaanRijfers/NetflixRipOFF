@@ -15,7 +15,7 @@ class ProfileFactory extends Factory
             'profile_picture_path' => $this->faker->optional()->imageUrl(),
             'date_of_birth' => $this->faker->date(),
             'language_id' => $this->faker->numberBetween(1, 5), // Assuming 1–5 are valid language IDs
-            'media_preference' => MediaType::inRandomOrder()->first()->id, // Random media type preference
+            'media_preference' => $this->faker->randomElement(['MOVIE', 'EPISODE'])
         ];
     }
 }

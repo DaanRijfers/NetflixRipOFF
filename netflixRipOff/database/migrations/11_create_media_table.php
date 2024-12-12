@@ -17,9 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->date('release_date')->nullable();
             $table->integer('duration')->nullable();
-            $table->foreignId('media_type_id')
-                  ->constrained('media_types')
-                  ->onDelete('cascade');
+            $table->enum('media_type', ['MOVIE', 'EPISODE']);
             $table->string('series_title')->nullable();
             $table->integer('season_number')->nullable();
             $table->integer('episode_number')->nullable();

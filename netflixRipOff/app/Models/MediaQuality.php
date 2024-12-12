@@ -11,7 +11,7 @@ class MediaQuality extends Model
 
     protected $fillable = [
         'media_id',
-        'quality_id',
+        'quality',
     ];
 
     /**

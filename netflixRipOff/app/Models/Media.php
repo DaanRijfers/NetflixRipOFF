@@ -42,6 +42,6 @@ class Media extends Model
 
     public function quality()
     {
-        return $this->belongsToMany(Quality::class, 'media_quality');
+        return $this->belongsToMany(Quality::class, 'media_qualities');
     }
 }

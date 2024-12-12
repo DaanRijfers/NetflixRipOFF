@@ -17,13 +17,10 @@ class MediaWithDetailsViewSeeder extends Seeder
             SELECT
                 media.id AS media_id,
                 media.title AS media_title,
-                media_types.name AS media_type,
                 GROUP_CONCAT(DISTINCT genres.name) AS genres,
                 GROUP_CONCAT(DISTINCT restrictions.name) AS restrictions
             FROM
                 media
-            LEFT JOIN
-                media_types ON media.media_type_id = media_types.id
             LEFT JOIN
                 media_genres ON media.id = media_genres.media_id
             LEFT JOIN
@@ -33,7 +30,7 @@ class MediaWithDetailsViewSeeder extends Seeder
             LEFT JOIN
                 restrictions ON media_restrictions.restriction_id = restrictions.id
             GROUP BY
-                media.id, media.title, media_types.name
+                media.id, media.title, media_type
             ORDER BY
                 media.title;
         ");
