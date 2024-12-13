@@ -18,6 +18,7 @@ class Media extends Model
         'season_number',
         'episode_number',
         'language_id',
+        'file_path',
     ];
 
     public function categories()

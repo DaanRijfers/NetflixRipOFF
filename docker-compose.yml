@@ -27,12 +27,12 @@ services:
 
   laravel:
     build:
-      context: .
-      dockerfile: ./netflixRipOff/Dockerfile
+      context: ./netflixRipOff
+      dockerfile: Dockerfile
     container_name: netflixripoff-laravel
     platform: linux/amd64
     environment:
-      DB_HOST: ${DB_HOST}
+      DB_HOST: mariadb
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -44,6 +44,27 @@ services:
       - mariadb
     command: >
       sh -c "/var/www/html/wait-for-it.sh mariadb:3306 -- /var/www/html/entrypoint.sh"
+
+  vite:
+    build:
+      context: ./netflixRipOff
+      dockerfile: Dockerfile
+    container_name: netflixripoff-vite
+    platform: linux/amd64
+    working_dir: /var/www/html
+    environment:
+      DB_HOST: mariadb
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5173:5173"
+    command: >
+      sh -c "npm install && npm run dev"
+    volumes:
+      - ./netflixRipOff:/var/www/html:z
+    depends_on:
+      - laravel
 
 volumes:
   mariadb-data:

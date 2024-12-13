@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('release_date')->nullable();
             $table->integer('duration')->nullable();
             $table->enum('media_type', ['MOVIE', 'EPISODE']);
+            $table->string('file_path');
             $table->string('series_title')->nullable();
             $table->integer('season_number')->nullable();
             $table->integer('episode_number')->nullable();

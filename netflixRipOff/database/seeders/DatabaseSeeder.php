@@ -41,13 +41,25 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        // Seed views from the 'views' folder
         $this->call([
-            MediaWithDetailsViewSeeder::class,
-            UserMediaQualitiesViewSeeder::class,
-            MediaAvailabilityByQualityViewSeeder::class,
-            SeriesWithEpisodesViewSeeder::class
+            \Database\Seeders\Views\MediaWithDetailsViewSeeder::class,
+            \Database\Seeders\Views\UserMediaQualitiesViewSeeder::class,
+            \Database\Seeders\Views\MediaAvailabilityByQualityViewSeeder::class,
+            \Database\Seeders\Views\SeriesWithEpisodesViewSeeder::class,
+            \Database\Seeders\Views\SeriesEpisodesWithFilesViewSeeder::class,
+            \Database\Seeders\Views\MoviesWithQualityViewSeeder::class,
         ]);
 
         $this->command->info('Views created successfully.');
+
+         // Call stored procedure seeders
+         $this->call([
+            \Database\Seeders\Procedures\UserStoredProcedureSeeder::class,
+            \Database\Seeders\Procedures\UserInvitationsStoredProcedureSeeder::class,
+            \Database\Seeders\Procedures\WatchlistStoredProcedureSeeder::class,
+        ]);
+
+        $this->command->info('Stored procedures created successfully.');
     }
 }

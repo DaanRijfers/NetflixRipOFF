@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\Procedures;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +32,7 @@ class WatchlistStoredProcedureSeeder extends Seeder
             )
             BEGIN
                 DELETE FROM watchlist
-                WHERE profile_id = proflieId AND media_id = mediaId;
+                WHERE profile_id = profileId AND media_id = mediaId;
             END;
         ");
     }

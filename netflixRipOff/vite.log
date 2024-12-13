@@ -1,0 +1,13 @@
+
+> dev
+> vite
+
+Re-optimizing dependencies because vite config has changed
+
+  VITE v5.4.11  ready in 863 ms
+
+  ➜  Local:   http://localhost:5173/
+
+  LARAVEL v11.33.2  plugin v1.0.6
+
+  ➜  APP_URL: http://localhost:8000

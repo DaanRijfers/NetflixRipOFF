@@ -26,8 +26,8 @@ Route::put('/profile/{profile_id}', [ProfileController::class, 'update']);
 Route::delete('/profile/{profile_id}', [ProfileController::class, 'destroy']);
 
 // Content Routes
-Route::get('/content', [ContentController::class, 'index']);
-Route::get('/content/{content_id}', [ContentController::class, 'show']);
+Route::get('/content', [ContentController::class, 'index'])->name('content.index');
+Route::get('/content/{content_id}', [ContentController::class, 'show'])->name('content.show');
 Route::get('/content/recommendations', [ContentController::class, 'recommendations']);
 Route::get('/content/search', [ContentController::class, 'search']);
 
