@@ -1,5 +1,14 @@
 #!/bin/bash
 
+set -e
+
+echo "Starting Laravel setup..."
+
+# Install Composer dependencies
+echo "Installing Composer dependencies..."
+composer install || { echo "Composer install failed! Exiting."; exit 1; }
+echo "Composer dependencies installed."
+
 # Define the path to the root .env file (relative to where docker-compose.yml is mounted)
 ROOT_ENV_FILE=/var/www/.env
 

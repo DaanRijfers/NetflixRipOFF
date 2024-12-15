@@ -32,11 +32,13 @@ services:
   vuejs:
     build:
       context: ./frontend
+      dockerfile: Dockerfile
     container_name: vue-frontend
     ports:
       - "8080:8080"
     volumes:
       - ./frontend:/app
+      - /app/node_modules
     command: npm run serve
 
   phpmyadmin:

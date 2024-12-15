@@ -1,15 +1,20 @@
-FROM node:16
+# Use the official Node.js image
+FROM node:20
 
-# Set working directory
+# Set the working directory
 WORKDIR /app
 
-# Copy the application
-COPY . .
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-# Install dependencies
+# Install project dependencies
 RUN npm install
 
-# Expose port
+# Copy the rest of the application
+COPY . .
+
+# Expose the development server port
 EXPOSE 8080
 
+# Run Vue development server
 CMD ["npm", "run", "serve"]
