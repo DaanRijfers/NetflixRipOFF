@@ -1,6 +1,13 @@
-MYSQL_ROOT_PASSWORD=
-MYSQL_DATABASE=
-DB_HOST=
-DB_DATABASE= 
-DB_USERNAME= 
-DB_PASSWORD=
+# Laravel Database Configuration
+DB_PORT=3306
+DB_HOST=db                   
+DB_NAME=              
+DB_USER=              
+DB_PASSWORD=   
+SEEDING=true
+
+# MariaDB Container Configuration
+DB_CONTAINER_DATABASE=
+DB_CONTAINER_USER=
+DB_CONTAINER_PASSWORD=
+
