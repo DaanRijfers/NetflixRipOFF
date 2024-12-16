@@ -43,21 +43,21 @@ class DatabaseSeeder extends Seeder
 
         // Seed views from the 'views' folder
         $this->call([
-            \Database\Seeders\Views\MediaWithDetailsViewSeeder::class,
-            \Database\Seeders\Views\UserMediaQualitiesViewSeeder::class,
-            \Database\Seeders\Views\MediaAvailabilityByQualityViewSeeder::class,
-            \Database\Seeders\Views\SeriesWithEpisodesViewSeeder::class,
-            \Database\Seeders\Views\SeriesEpisodesWithFilesViewSeeder::class,
-            \Database\Seeders\Views\MoviesWithQualityViewSeeder::class,
+            \Database\Seeders\views\MediaWithDetailsViewSeeder::class,
+            \Database\Seeders\views\UserMediaQualitiesViewSeeder::class,
+            \Database\Seeders\views\MediaAvailabilityByQualityViewSeeder::class,
+            \Database\Seeders\views\SeriesWithEpisodesViewSeeder::class,
+            \Database\Seeders\views\SeriesEpisodesWithFilesViewSeeder::class,
+            \Database\Seeders\views\MoviesWithQualityViewSeeder::class,
         ]);
 
         $this->command->info('Views created successfully.');
 
          // Call stored procedure seeders
          $this->call([
-            \Database\Seeders\Procedures\UserStoredProcedureSeeder::class,
-            \Database\Seeders\Procedures\UserInvitationsStoredProcedureSeeder::class,
-            \Database\Seeders\Procedures\WatchlistStoredProcedureSeeder::class,
+            \Database\Seeders\procedures\UserStoredProcedureSeeder::class,
+            \Database\Seeders\procedures\UserInvitationsStoredProcedureSeeder::class,
+            \Database\Seeders\procedures\WatchlistStoredProcedureSeeder::class,
         ]);
 
         $this->command->info('Stored procedures created successfully.');
