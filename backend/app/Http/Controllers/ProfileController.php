@@ -65,4 +65,23 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    /**
+     * Return profiles in JSON or CSV format based on the request header.
+     */
+    public function export(Request $request)
+    {
+        $profiles = Profile::all();
+
+        if ($request->header('Accept') === 'text/csv') {
+            $csvData = $profiles->map(function ($profile) {
+                return $profile->toArray();
+            })->implode("\n");
+
+            return response($csvData, 200)
+                ->header('Content-Type', 'text/csv');
+        }
+
+        return response()->json($profiles);
+    }
 }
