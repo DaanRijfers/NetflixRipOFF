@@ -1,24 +1,32 @@
-<script setup>
-import MoviesAndSeries from './components/MoviesAndSeries.vue';
+<template>
+  <div id="app">
+    <nav>
+      <router-link to="/login">Login</router-link>
+      <router-link to="/register">Register</router-link>
+      <router-link to="/reset-password">Reset Password</router-link>
+    </nav>
+    <router-view></router-view>
+  </div>
+</template>
 
-// Placeholder data for Movies and Series
-const series = {
-  data: [
-    { series_title: "Breaking Bad", season_number: 1, episode_number: 1, episode_title: "Pilot" },
-    { series_title: "Breaking Bad", season_number: 1, episode_number: 2, episode_title: "Cat's in the Bag" },
-    { series_title: "Breaking Bad", season_number: 1, episode_number: 3, episode_title: "And the Bag's in the River" }
-  ]
-};
-
-const movies = {
-  data: [
-    { movie_id: 1, movie_title: "Inception", qualities: "SD, HD, UHD" },
-    { movie_id: 2, movie_title: "The Dark Knight", qualities: "HD, UHD" },
-    { movie_id: 3, movie_title: "Interstellar", qualities: "HD, UHD, 4K" }
-  ]
+<script>
+export default {
+  name: 'App'
 };
 </script>
 
-<template>
-  <MoviesAndSeries :series="series" :movies="movies" />
-</template>
+<style>
+nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+nav a {
+  text-decoration: none;
+  color: blue;
+}
+nav a.router-link-exact-active {
+  font-weight: bold;
+  color: red;
+}
+</style>
