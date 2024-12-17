@@ -38,9 +38,20 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($request->only('email', 'password'))) {
+            $user = Auth::user();
             return $this->respond(['message' => 'Login successful!'], 200, $request);
-        }
+        } 
+        $user = User::where('email', $request->email)->first();
 
+        if ($user){
+            $user->increment('login_attempts');
+
+            if ($user->login_attempts >= 3){
+                return $this->respond(['message' => 'Account locked. Please reset your password.'], 423, $request);
+            }
+
+            $user->save();
+        }
         return $this->respond(['message' => 'Invalid credentials'], 401, $request);
     }
 
