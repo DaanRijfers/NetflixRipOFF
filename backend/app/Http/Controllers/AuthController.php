@@ -37,24 +37,28 @@ class AuthController extends Controller
             'username' => 'required|string',
             'password' => 'required|string',
         ]);
-
-        if (Auth::attempt($request->only('username', 'password'))) {
-            $user = Auth::user();
-            $user->update(['login_attempts' => 0]); // Reset login attempts on success
-            return $this->respond(['message' => 'Login successful!'], 200, $request);
-        }
-
-        $user = User::where('username', $request->username)->first();
-        if ($user) {
-            $user->increment('login_attempts');
-
-            if ($user->login_attempts >= 3) {
-                return $this->respondWithError($request, 423);
+    
+        $credentials = $request->only('email', 'password');
+    
+        if (!$token = auth()->attempt($credentials)) {
+            $user = User::where('email', $request->email)->first();
+    
+            if ($user) {
+                $user->increment('failed_login_attempts');
+                if ($user->failed_login_attempts >= 3) {
+                    return response()->json(['message' => 'Account locked. Please reset your password.'], 423);
+                }
+                $user->save();
             }
-
-            $user->save();
+    
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
-        return $this->respondWithError($request, 401);
+    
+        $user = auth()->user();
+        $user->failed_login_attempts = 0;
+        $user->save();
+
+        return $this->respondWithToken($token);
     }
 
     // Logout user
@@ -137,6 +141,17 @@ class AuthController extends Controller
         return $xmlData->asXML();
     }
 
+    // Helper function for generating JWT token
+    protected function respondWithToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60,
+            'user' => auth()->user(),
+        ]);
+    }
+
     // Handle errors and generate appropriate error code
     private function handleError(int $status): string
     {
@@ -148,12 +163,9 @@ class AuthController extends Controller
     private function getHttpErrorMessages(): array
     {
         return [
-            // Informational responses (1xx)
             100 => 'Continue',
             101 => 'Switching Protocols',
             102 => 'Processing',
-
-            // Successful responses (2xx)
             200 => 'OK',
             201 => 'Created',
             202 => 'Accepted',
@@ -164,8 +176,6 @@ class AuthController extends Controller
             207 => 'Multi-Status',
             208 => 'Already Reported',
             226 => 'IM Used',
-
-            // Redirection messages (3xx)
             300 => 'Multiple Choices',
             301 => 'Moved Permanently',
             302 => 'Found',
@@ -174,8 +184,6 @@ class AuthController extends Controller
             305 => 'Use Proxy',
             307 => 'Temporary Redirect',
             308 => 'Permanent Redirect',
-
-            // Client error responses (4xx)
             400 => 'Bad Request',
             401 => 'Unauthorized',
             402 => 'Payment Required',
@@ -205,8 +213,6 @@ class AuthController extends Controller
             429 => 'Too Many Requests',
             431 => 'Request Header Fields Too Large',
             451 => 'Unavailable For Legal Reasons',
-
-            // Server error responses (5xx)
             500 => 'Internal Server Error',
             501 => 'Not Implemented',
             502 => 'Bad Gateway',
