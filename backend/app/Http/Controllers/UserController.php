@@ -8,65 +8,195 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     // Get all users
-    public function index()
+    public function index(Request $request)
     {
-        return $this->respondWithFormat(User::all());
+        try {
+            $users = User::all();
+            return $this->respond($request, $users);
+        } catch (\Exception $e) {
+            return $this->respondWithError($request, 500);
+        }
     }
 
     // Get a specific user
-    public function show($user_id)
+    public function show(Request $request, $user_id)
     {
-        $user = User::findOrFail($user_id);
-        return $this->respondWithFormat($user);
+        try {
+            $user = User::findOrFail($user_id);
+            return $this->respond($request, $user);
+        } catch (\Exception $e) {
+            return $this->respondWithError($request, 404);
+        }
     }
 
     // Update user information
     public function update(Request $request, $user_id)
     {
-        $user = User::findOrFail($user_id);
-        $user->update($request->all());
-        return $this->respondWithFormat(['message' => 'User updated successfully!', 'user' => $user]);
+        try {
+            $user = User::findOrFail($user_id);
+            $user->update($request->all());
+            return $this->respond($request, ['message' => 'User updated successfully!', 'user' => $user]);
+        } catch (\Exception $e) {
+            return $this->respondWithError($request, 500);
+        }
     }
 
     // Delete user
-    public function destroy($user_id)
+    public function destroy(Request $request, $user_id)
     {
-        $user = User::findOrFail($user_id);
-        $user->delete();
-        return $this->respondWithFormat(['message' => 'User deleted successfully!']);
-    }
-
-    // Determine response format based on Accept header
-    private function respondWithFormat($data, $status = 200)
-    {
-        $acceptHeader = request()->header('Accept');
-
-        if ($acceptHeader === 'text/csv') {
-            $csvData = $this->convertToCsv($data);
-            return response($csvData, $status)->header('Content-Type', 'text/csv');
+        try {
+            $user = User::findOrFail($user_id);
+            $user->delete();
+            return $this->respond($request, ['message' => 'User deleted successfully!']);
+        } catch (\Exception $e) {
+            return $this->respondWithError($request, 500);
         }
-
-        return response()->json($data, $status);
     }
 
-    // Convert data to CSV format
+    // Helper function to respond in JSON, CSV, or XML format
+    private function respond(Request $request, $data, $status = 200)
+    {
+        $acceptHeader = $request->header('Accept');
+
+        switch ($acceptHeader) {
+            case 'text/csv':
+                $csvData = $this->convertToCsv($data);
+                return response($csvData, $status)->header('Content-Type', 'text/csv');
+            case 'text/xml':
+                $xmlData = $this->arrayToXml($data);
+                return response($xmlData, $status)->header('Content-Type', 'text/xml');
+            default:
+                return response()->json($data, $status);
+        }
+    }
+
+    // Helper function to respond with error
+    private function respondWithError(Request $request, $status)
+    {
+        $message = $this->handleError($status);
+        return $this->respond($request, ['error' => $message], $status);
+    }
+
+    // Helper function to convert data to CSV format
     private function convertToCsv($data)
     {
-        if ($data instanceof \Illuminate\Database\Eloquent\Collection) {
-            $data = $data->toArray();
-        }
-
         $csv = '';
         $header = false;
 
         foreach ($data as $row) {
             if (!$header) {
-                $csv .= implode(',', array_keys($row)) . "\n";
+                // Add the header row
+                $csv .= implode(',', array_keys((array)$row)) . "\n";
                 $header = true;
             }
-            $csv .= implode(',', array_values($row)) . "\n";
+            // Add the data rows
+            $csv .= implode(',', array_values((array)$row)) . "\n";
         }
 
         return $csv;
+    }
+
+    // Helper function to convert array to XML
+    private function arrayToXml(array $data, \SimpleXMLElement $xmlData = null): string
+    {
+        if ($xmlData === null) {
+            $xmlData = new \SimpleXMLElement('<root/>');
+        }
+
+        foreach ($data as $key => $value) {
+            $key = is_numeric($key) ? "item$key" : $key;
+            if (is_array($value)) {
+                $subnode = $xmlData->addChild($key);
+                $this->arrayToXml($value, $subnode);
+            } else {
+                $xmlData->addChild($key, htmlspecialchars("$value"));
+            }
+        }
+
+        return $xmlData->asXML();
+    }
+
+    // Handle errors and generate appropriate error code
+    private function handleError($status)
+    {
+        $errorMessages = $this->getHttpErrorMessages();
+        return $errorMessages[$status] ?? 'An error occurred';
+    }
+
+    // Get all HTTP error messages
+    private function getHttpErrorMessages()
+    {
+        return [
+            // Informational responses (1xx)
+            100 => 'Continue',
+            101 => 'Switching Protocols',
+            102 => 'Processing',
+
+            // Successful responses (2xx)
+            200 => 'OK',
+            201 => 'Created',
+            202 => 'Accepted',
+            203 => 'Non-Authoritative Information',
+            204 => 'No Content',
+            205 => 'Reset Content',
+            206 => 'Partial Content',
+            207 => 'Multi-Status',
+            208 => 'Already Reported',
+            226 => 'IM Used',
+
+            // Redirection messages (3xx)
+            300 => 'Multiple Choices',
+            301 => 'Moved Permanently',
+            302 => 'Found',
+            303 => 'See Other',
+            304 => 'Not Modified',
+            305 => 'Use Proxy',
+            307 => 'Temporary Redirect',
+            308 => 'Permanent Redirect',
+
+            // Client error responses (4xx)
+            400 => 'Bad Request',
+            401 => 'Unauthorized',
+            402 => 'Payment Required',
+            403 => 'Forbidden',
+            404 => 'Not Found',
+            405 => 'Method Not Allowed',
+            406 => 'Not Acceptable',
+            407 => 'Proxy Authentication Required',
+            408 => 'Request Timeout',
+            409 => 'Conflict',
+            410 => 'Gone',
+            411 => 'Length Required',
+            412 => 'Precondition Failed',
+            413 => 'Payload Too Large',
+            414 => 'URI Too Long',
+            415 => 'Unsupported Media Type',
+            416 => 'Range Not Satisfiable',
+            417 => 'Expectation Failed',
+            418 => 'I’m a teapot',
+            421 => 'Misdirected Request',
+            422 => 'Unprocessable Entity',
+            423 => 'Locked',
+            424 => 'Failed Dependency',
+            425 => 'Too Early',
+            426 => 'Upgrade Required',
+            428 => 'Precondition Required',
+            429 => 'Too Many Requests',
+            431 => 'Request Header Fields Too Large',
+            451 => 'Unavailable For Legal Reasons',
+
+            // Server error responses (5xx)
+            500 => 'Internal Server Error',
+            501 => 'Not Implemented',
+            502 => 'Bad Gateway',
+            503 => 'Service Unavailable',
+            504 => 'Gateway Timeout',
+            505 => 'HTTP Version Not Supported',
+            506 => 'Variant Also Negotiates',
+            507 => 'Insufficient Storage',
+            508 => 'Loop Detected',
+            510 => 'Not Extended',
+            511 => 'Network Authentication Required',
+        ];
     }
 }
