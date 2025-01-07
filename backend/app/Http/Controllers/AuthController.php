@@ -36,23 +36,28 @@ class AuthController extends Controller
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
-
-        if (Auth::attempt($request->only('email', 'password'))) {
-            $user = Auth::user();
-            return $this->respond(['message' => 'Login successful!'], 200, $request);
-        } 
-        $user = User::where('email', $request->email)->first();
-
-        if ($user){
-            $user->increment('login_attempts');
-
-            if ($user->login_attempts >= 3){
-                return $this->respond(['message' => 'Account locked. Please reset your password.'], 423, $request);
+    
+        $credentials = $request->only('email', 'password');
+    
+        if (!$token = auth()->attempt($credentials)) {
+            $user = User::where('email', $request->email)->first();
+    
+            if ($user) {
+                $user->increment('failed_login_attempts');
+                if ($user->failed_login_attempts >= 3) {
+                    return response()->json(['message' => 'Account locked. Please reset your password.'], 423);
+                }
+                $user->save();
             }
-
-            $user->save();
+    
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
-        return $this->respond(['message' => 'Invalid credentials'], 401, $request);
+    
+        $user = auth()->user();
+        $user->failed_login_attempts = 0;
+        $user->save();
+
+        return $this->respondWithToken($token);
     }
 
     // Logout user
@@ -104,5 +109,16 @@ class AuthController extends Controller
         }
 
         return $csv;
+    }
+
+    // Helper function for generating JWT token
+    protected function respondWithToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60,
+            'user' => auth()->user(),
+        ]);
     }
 }
