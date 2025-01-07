@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
@@ -16,12 +15,14 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
         ]);
 
         $user = User::create([
             'name' => $request->name,
+            'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
@@ -33,20 +34,21 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|string|email',
+            'username' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'))) {
+        if (Auth::attempt($request->only('username', 'password'))) {
             $user = Auth::user();
+            $user->update(['login_attempts' => 0]); // Reset login attempts on success
             return $this->respond(['message' => 'Login successful!'], 200, $request);
-        } 
-        $user = User::where('email', $request->email)->first();
+        }
 
-        if ($user){
+        $user = User::where('username', $request->username)->first();
+        if ($user) {
             $user->increment('login_attempts');
 
-            if ($user->login_attempts >= 3){
+            if ($user->login_attempts >= 3) {
                 return $this->respond(['message' => 'Account locked. Please reset your password.'], 423, $request);
             }
 
@@ -69,6 +71,11 @@ class AuthController extends Controller
             'email' => 'required|string|email',
         ]);
 
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return $this->respond(['message' => 'Email not found.'], 404, $request);
+        }
+
         $status = Password::sendResetLink($request->only('email'));
 
         return $status === Password::RESET_LINK_SENT
@@ -81,12 +88,16 @@ class AuthController extends Controller
     {
         $acceptHeader = $request->header('Accept');
 
-        if ($acceptHeader === 'text/csv') {
-            $csvData = $this->arrayToCsv($data);
-            return response($csvData, $status)->header('Content-Type', 'text/csv');
+        switch ($acceptHeader) {
+            case 'text/csv':
+                $csvData = $this->arrayToCsv($data);
+                return response($csvData, $status)->header('Content-Type', 'text/csv');
+            case 'text/xml':
+                $xmlData = $this->arrayToXml($data);
+                return response($xmlData, $status)->header('Content-Type', 'text/xml');
+            default:
+                return response()->json($data, $status);
         }
-
-        return response()->json($data, $status);
     }
 
     // Helper function to convert array to CSV
@@ -104,5 +115,25 @@ class AuthController extends Controller
         }
 
         return $csv;
+    }
+
+    // Helper function to convert array to XML
+    private function arrayToXml(array $data, \SimpleXMLElement $xmlData = null): string
+    {
+        if ($xmlData === null) {
+            $xmlData = new \SimpleXMLElement('<users/>');
+        }
+
+        foreach ($data as $key => $value) {
+            $key = is_numeric($key) ? "item$key" : $key;
+            if (is_array($value)) {
+                $subnode = $xmlData->addChild($key);
+                $this->arrayToXml($value, $subnode);
+            } else {
+                $xmlData->addChild($key, htmlspecialchars("$value"));
+            }
+        }
+
+        return $xmlData->asXML();
     }
 }
