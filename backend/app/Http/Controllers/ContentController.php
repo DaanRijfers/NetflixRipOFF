@@ -23,27 +23,14 @@ class ContentController extends Controller
             ->select('movie_id', 'movie_title', 'qualities')
             ->paginate(10);
 
-        // Check the Accept header
-        $acceptHeader = $request->header('Accept');
-
-        if ($acceptHeader == 'text/csv') {
-            // Convert data to CSV format
-            $csvData = $this->convertToCsv([
-                'series' => $series->items(),
-                'movies' => $movies->items(),
-            ]);
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="content.csv"',
-            ]);
-        }
-
-        // Return data as JSON
-        return response()->json([
+        // Prepare data
+        $data = [
             'series' => $series,
             'movies' => $movies,
-        ]);
+        ];
+
+        // Use the respond function
+        return $this->respond($data, 200, $request);
     }
 
     // Get specific content
@@ -51,20 +38,8 @@ class ContentController extends Controller
     {
         $content = Media::findOrFail($content_id);
 
-        // Check the Accept header
-        $acceptHeader = $request->header('Accept');
-
-        if ($acceptHeader == 'text/csv') {
-            // Convert data to CSV format
-            $csvData = $this->convertToCsv([$content]);
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="content.csv"',
-            ]);
-        }
-
-        return response()->json($content);
+        // Use the respond function
+        return $this->respond($content->toArray(), 200, $request);
     }
 
     // Get recommendations
@@ -72,20 +47,8 @@ class ContentController extends Controller
     {
         $recommendations = Media::all()->random(5); // Example of random recommendations
 
-        // Check the Accept header
-        $acceptHeader = $request->header('Accept');
-
-        if ($acceptHeader == 'text/csv') {
-            // Convert data to CSV format
-            $csvData = $this->convertToCsv($recommendations);
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="recommendations.csv"',
-            ]);
-        }
-
-        return response()->json($recommendations);
+        // Use the respond function
+        return $this->respond($recommendations->toArray(), 200, $request);
     }
 
     // Search content
@@ -94,20 +57,25 @@ class ContentController extends Controller
         $query = $request->get('query');
         $content = Media::where('title', 'like', "%$query%")->get();
 
-        // Check the Accept header
+        // Use the respond function
+        return $this->respond($content->toArray(), 200, $request);
+    }
+
+    // Helper function to respond in JSON or CSV format
+    private function respond(array $data, int $status, Request $request)
+    {
         $acceptHeader = $request->header('Accept');
 
-        if ($acceptHeader == 'text/csv') {
-            // Convert data to CSV format
-            $csvData = $this->convertToCsv($content);
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="search_results.csv"',
-            ]);
+        switch ($acceptHeader) {
+            case 'text/csv':
+                $csvData = $this->convertToCsv($data);
+                return response($csvData, $status)->header('Content-Type', 'text/csv');
+            case 'text/xml':
+                $xmlData = $this->arrayToXml($data);
+                return response($xmlData, $status)->header('Content-Type', 'text/xml');
+            default:
+                return response()->json($data, $status);
         }
-
-        return response()->json($content);
     }
 
     // Helper function to convert data to CSV format
@@ -127,5 +95,25 @@ class ContentController extends Controller
         }
 
         return $csv;
+    }
+
+    // Helper function to convert array to XML
+    private function arrayToXml(array $data, \SimpleXMLElement $xmlData = null): string
+    {
+        if ($xmlData === null) {
+            $xmlData = new \SimpleXMLElement('<users/>');
+        }
+
+        foreach ($data as $key => $value) {
+            $key = is_numeric($key) ? "item$key" : $key;
+            if (is_array($value)) {
+                $subnode = $xmlData->addChild($key);
+                $this->arrayToXml($value, $subnode);
+            } else {
+                $xmlData->addChild($key, htmlspecialchars("$value"));
+            }
+        }
+
+        return $xmlData->asXML();
     }
 }
