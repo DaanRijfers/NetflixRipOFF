@@ -91,14 +91,7 @@ abstract class Controller
     // Handle errors and generate appropriate error code
     private function handleError(int $status): string
     {
-        $errorMessages = $this->getHttpErrorMessages();
-        return $errorMessages[$status] ?? 'An error occurred';
-    }
-
-    // Get all HTTP error messages
-    private function getHttpErrorMessages(): array
-    {
-        return [
+        $errorMessages = [
             // Informational responses (1xx)
             100 => 'Continue',
             101 => 'Switching Protocols',
@@ -145,7 +138,7 @@ abstract class Controller
             415 => 'Unsupported Media Type',
             416 => 'Range Not Satisfiable',
             417 => 'Expectation Failed',
-            418 => 'I’m a teapot',
+            418 => 'I\'m a teapot',
             421 => 'Misdirected Request',
             422 => 'Unprocessable Entity',
             423 => 'Locked',
@@ -170,5 +163,6 @@ abstract class Controller
             510 => 'Not Extended',
             511 => 'Network Authentication Required',
         ];
+        return $status . ": " . $errorMessages[$status] ?? 'An error occurred';
     }
 }
