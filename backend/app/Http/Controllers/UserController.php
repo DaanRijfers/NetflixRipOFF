@@ -23,7 +23,7 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($user_id);
-            return $this->respond(['message' => 'User fetched succesfuly!', 'user' => $users], 200, $request);
+            return $this->respond(['message' => 'User fetched succesfuly!', 'user' => $user], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(404, $request);
         }
