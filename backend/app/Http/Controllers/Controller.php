@@ -1,11 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Http\Request;
 
 abstract class Controller
 {
     // Helper function to respond in JSON, CSV, or XML format
-    private function respond(Request $request, array $data, int $status = 200)
+    protected function respond(array $data, int $status = 200, Request $request)
     {
         $acceptHeader = $request->header('Accept');
 
@@ -22,7 +23,7 @@ abstract class Controller
     }
 
     // Helper function to respond with error
-    private function respondWithError(Request $request, int $status)
+    protected function respondWithError(Request $request, int $status)
     {
         $message = $this->handleError($status);
         return $this->respond($request, ['error' => $message], $status);
