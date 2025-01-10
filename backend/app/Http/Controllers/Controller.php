@@ -16,7 +16,7 @@ abstract class Controller
                 return response($csvData, $status)->header('Content-Type', 'text/csv');
             case 'text/xml':
                 $xmlData = $this->arrayToXml($data);
-                return response($xmlData, $status)->header('Content-Type', 'text/xml');
+                return response($xmlData, $status)->header('Content-Type', 'application/xml');
             default:
                 return response()->json($data, $status);
         }
@@ -26,23 +26,36 @@ abstract class Controller
     protected function respondWithError(Request $request, int $status)
     {
         $message = $this->handleError($status);
-        return $this->respond($request, ['error' => $message], $status);
+        return $this->respond(['error' => $message], $status, $request);
     }
 
     // Helper function to convert data to CSV format
     private function convertToCsv($data)
     {
-        $csv = '';
-        $header = false;
+        // die(json_encode($data));
+        foreach($data as $key => $value)
+        {
+            if($key != 'message')
+            {
+                $fp = fopen('php://memory', 'w+');
+                $header = false;
 
-        foreach ($data as $row) {
-            if (!$header) {
-                // Add the header row
-                $csv .= implode(',', array_keys((array)$row)) . "\n";
-                $header = true;
+                foreach ($value as $fields) {
+                    if ($fields instanceof \Illuminate\Database\Eloquent\Model || $fields instanceof \Illuminate\Support\Collection) {
+                        $fields = $fields->toArray();
+                    } elseif (is_object($fields)) {
+                        $fields = get_object_vars($fields);
+                    }
+                    if(!$header) {
+                        $header = true;
+                        fputcsv($fp, array_keys($fields));
+                    }
+                    fputcsv($fp, $fields);
+                }
+                rewind($fp);
+                $csv = stream_get_contents($fp);
+                fclose($fp);
             }
-            // Add the data rows
-            $csv .= implode(',', array_values((array)$row)) . "\n";
         }
 
         return $csv;
@@ -57,11 +70,18 @@ abstract class Controller
 
         foreach ($data as $key => $value) {
             $key = is_numeric($key) ? "item$key" : $key;
+
+            if ($value instanceof \Illuminate\Database\Eloquent\Model || $value instanceof \Illuminate\Support\Collection) {
+                $value = $value->toArray();
+            } elseif (is_object($value)) {
+                $value = get_object_vars($value);
+            }
+
             if (is_array($value)) {
                 $subnode = $xmlData->addChild($key);
                 $this->arrayToXml($value, $subnode);
             } else {
-                $xmlData->addChild($key, htmlspecialchars("$value"));
+                $xmlData->addChild($key, htmlspecialchars((string) $value));
             }
         }
 
