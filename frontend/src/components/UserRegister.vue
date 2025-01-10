@@ -3,10 +3,6 @@
       <h2>Register</h2>
       <form @submit.prevent="register">
         <div>
-          <label>Name:</label>
-          <input type="text" v-model="name" required>
-        </div>
-        <div>
           <label>Email:</label>
           <input type="email" v-model="email" required>
         </div>
@@ -34,8 +30,7 @@
     methods: {
       async register() {
         try {
-          const response = await axios.post('http://localhost:8000/api/register', {
-            name: this.name,
+          const response = await axios.post('http://localhost:8000/api/auth/register', {
             email: this.email,
             password: this.password
           });
