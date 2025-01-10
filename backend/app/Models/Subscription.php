@@ -11,7 +11,7 @@ class Subscription extends Model
 
     protected $fillable = [
         'price',
-        'quality_id',
+        'quality'
     ];
 
     public function users()
