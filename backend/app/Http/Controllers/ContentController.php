@@ -33,7 +33,7 @@ class ContentController extends Controller
             // Use the respond function
             return $this->respond($request, $data);
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 
@@ -46,7 +46,7 @@ class ContentController extends Controller
             // Use the respond function
             return $this->respond($request, $content->toArray());
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 
@@ -59,7 +59,7 @@ class ContentController extends Controller
             // Use the respond function
             return $this->respond($request, $recommendations->toArray());
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 
@@ -73,7 +73,7 @@ class ContentController extends Controller
             // Use the respond function
             return $this->respond($request, $content->toArray());
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 }

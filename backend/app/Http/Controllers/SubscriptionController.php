@@ -14,7 +14,7 @@ class SubscriptionController extends Controller
             $subscriptions = Subscription::all();
             return $this->respond($request, $subscriptions);
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 
@@ -30,7 +30,7 @@ class SubscriptionController extends Controller
             $subscription = Subscription::create($request->all());
             return $this->respond($request, ['message' => 'Subscription created successfully!', 'subscription' => $subscription], 201);
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 
@@ -43,7 +43,7 @@ class SubscriptionController extends Controller
 
             return $this->respond($request, ['message' => 'Subscription updated successfully!', 'subscription' => $subscription]);
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 
@@ -56,7 +56,7 @@ class SubscriptionController extends Controller
 
             return $this->respond($request, ['message' => 'Subscription deleted successfully!']);
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 }

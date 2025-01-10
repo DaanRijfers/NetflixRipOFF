@@ -21,7 +21,7 @@ class ProfileController extends Controller
             $profiles = Profile::all();
             return $this->respond($request, ['profiles' => $profiles]);
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 
@@ -52,7 +52,7 @@ class ProfileController extends Controller
 
             return Redirect::route('profile.edit');
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 
@@ -77,7 +77,7 @@ class ProfileController extends Controller
 
             return Redirect::to('/');
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 
@@ -87,12 +87,12 @@ class ProfileController extends Controller
             $profiles = Profile::all();
 
             if ($profiles->isEmpty()) {
-                return $this->respondWithError($request, 404);
+                return $this->respondWithError(404, $request);
             }
 
             return $this->respond($request, $profiles->toArray());
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 }

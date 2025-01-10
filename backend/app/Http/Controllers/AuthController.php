@@ -73,14 +73,14 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {
-            return $this->respondWithError($request, 404);
+            return $this->respondWithError(404, $request);
         }
 
         $status = Password::sendResetLink($request->only('email'));
 
         return $status === Password::RESET_LINK_SENT
             ? $this->respond(['message' => 'Password reset link sent!'], 200, $request)
-            : $this->respondWithError($request, 400);
+            : $this->respondWithError(400, $request);
     }
 
     // Helper function for generating JWT token

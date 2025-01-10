@@ -14,7 +14,7 @@ class UserController extends Controller
             $users = User::all();
             return $this->respond($request, $users);
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 
@@ -25,7 +25,7 @@ class UserController extends Controller
             $user = User::findOrFail($user_id);
             return $this->respond($request, $user);
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 404);
+            return $this->respondWithError(404, $request);
         }
     }
 
@@ -37,7 +37,7 @@ class UserController extends Controller
             $user->update($request->all());
             return $this->respond($request, ['message' => 'User updated successfully!', 'user' => $user]);
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 
@@ -49,7 +49,7 @@ class UserController extends Controller
             $user->delete();
             return $this->respond($request, ['message' => 'User deleted successfully!']);
         } catch (\Exception $e) {
-            return $this->respondWithError($request, 500);
+            return $this->respondWithError(500, $request);
         }
     }
 }

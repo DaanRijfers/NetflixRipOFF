@@ -14,7 +14,7 @@ abstract class Controller
             case 'text/csv':
                 $csvData = $this->convertToCsv($data);
                 return response($csvData, $status)->header('Content-Type', 'text/csv');
-            case 'text/xml':
+            case 'application/xml':
                 $xmlData = $this->arrayToXml($data);
                 return response($xmlData, $status)->header('Content-Type', 'application/xml');
             default:
@@ -23,7 +23,7 @@ abstract class Controller
     }
 
     // Helper function to respond with error
-    protected function respondWithError(Request $request, int $status)
+    protected function respondWithError(int $status, Request $request)
     {
         $message = $this->handleError($status);
         return $this->respond(['error' => $message], $status, $request);
