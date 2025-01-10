@@ -42,19 +42,19 @@ class AuthController extends Controller
             if ($user) {
                 $user->increment('failed_login_attempts');
                 if ($user->failed_login_attempts >= 3) {
-                    return response()->json(['message' => 'Account locked. Please reset your password.'], 423);
+                    return $this->respond(['message' => 'Account locked. Please reset your password.'], 423, $request);
                 }
                 $user->save();
             }
     
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return $this->respond(['message' => 'Invalid credentials'], 401, $request);
         }
     
         $user = auth()->user();
         $user->failed_login_attempts = 0;
         $user->save();
 
-        return $this->respondWithToken($token);
+        return $this->respondWithToken($token, $request);
     }
 
     // Logout user
@@ -84,13 +84,13 @@ class AuthController extends Controller
     }
 
     // Helper function for generating JWT token
-    protected function respondWithToken($token)
+    protected function respondWithToken($token, $request)
     {
-        return response()->json([
+        return $this->respond(["message" => [
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
             'user' => auth()->user(),
-        ]);
+        ]], 200, $request);
     }
 }
