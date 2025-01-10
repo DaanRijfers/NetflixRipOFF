@@ -1,43 +1,53 @@
 <template>
-    <div>
-      <h2>Login</h2>
-      <form @submit.prevent="login">
-        <div>
-          <label>Username:</label>
-          <input type="text" v-model="username" required>
-        </div>
-        <div>
-          <label>Password:</label>
-          <input type="password" v-model="password" required>
-        </div>
-        <button type="submit">Login</button>
-      </form>
-    </div>
-  </template>
-  
-  <script>
-  import axios from 'axios';
-  
-  export default {
-    name: 'UserLogin',
-    data() {
-      return {
-        username: '',
-        password: ''
-      };
-    },
-    methods: {
-      async login() {
-        try {
-          const response = await axios.post('http://localhost:8000/auth', {
-            username: this.username,
-            password: this.password
-          });
-          alert(response.data.message);
-        } catch (error) {
-          alert('Login failed');
+  <div class="login-container">
+    <form @submit.prevent="login">
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" v-model="email" required />
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" v-model="password" required />
+      </div>
+      <button type="submit">Login</button>
+      <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
+      <div v-if="jwtSecretError" class="error">JWT secret is not set. Please contact support.</div>
+    </form>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      email: '',
+      password: '',
+      errorMessage: '',
+      jwtSecretError: false
+    };
+  },
+  methods: {
+    async login() {
+      try {
+        const response = await axios.post('http://localhost:8000/api/auth/login', {
+          email: this.email,
+          password: this.password
+        });
+        if (response.data.message === 'JWT secret is not set') {
+          this.jwtSecretError = true;
+        } else {
+          return "Je bent ingelogd";
         }
+      } catch (error) {
+        this.errorMessage = error.response.data.message || 'Login failed';
       }
     }
-  };
-  </script>
+  }
+};
+</script>
+
+<style scoped>
+/* Add your styles here */
+</style>
