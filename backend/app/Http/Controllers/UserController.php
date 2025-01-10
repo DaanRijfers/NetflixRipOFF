@@ -12,7 +12,7 @@ class UserController extends Controller
     {
         try {
             $users = User::all();
-            return $this->respond(['users' => $users], 200, $request);
+            return $this->respond(['message' => 'Users fetched succesfully!', 'users' => $users], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -23,7 +23,7 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($user_id);
-            return $this->respond(['user' => $users], 200, $request);
+            return $this->respond(['message' => 'User fetched succesfuly!', 'user' => $users], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(404, $request);
         }

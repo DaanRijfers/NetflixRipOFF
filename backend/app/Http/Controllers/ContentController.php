@@ -31,7 +31,7 @@ class ContentController extends Controller
             ];
 
             // Use the respond function
-            return $this->respond($data, 200, $request);
+            return $this->respond(['message' => 'Succesfully fetched all content', 'content' => $data], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -44,7 +44,7 @@ class ContentController extends Controller
             $content = Media::findOrFail($content_id);
 
             // Use the respond function
-            return $this->respond($content->toArray(), 200, $request);
+            return $this->respond(['message' => 'Succesfully fetched content', 'content' => $content->toArray()], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -57,7 +57,7 @@ class ContentController extends Controller
             $recommendations = Media::all()->random(5); // Example of random recommendations
 
             // Use the respond function
-            return $this->respond($recommendations->toArray(), 200, $request);
+            return $this->respond(['message' => 'Succesfully fetched reccomendations', 'content' => $recommendations->toArray()], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -71,7 +71,7 @@ class ContentController extends Controller
             $content = Media::where('title', 'like', "%$query%")->get();
 
             // Use the respond function
-            return $this->respond($content->toArray(), 200, $request);
+            return $this->respond(['message' => 'Succesfully completed search', 'content' => $content->toArray()], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }

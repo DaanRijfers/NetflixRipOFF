@@ -12,7 +12,7 @@ class SubscriptionController extends Controller
     {
         try {
             $subscriptions = Subscription::all();
-            return $this->respond($subscriptions, 200, $request);
+            return $this->respond(['message' => 'Succesfully fetched subscriptions', 'subscription' => $subscriptions], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
