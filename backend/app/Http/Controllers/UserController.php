@@ -12,7 +12,7 @@ class UserController extends Controller
     {
         try {
             $users = User::all();
-            return $this->respond($request, $users);
+            return $this->respond(['users' => $users], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -23,7 +23,7 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($user_id);
-            return $this->respond($request, $user);
+            return $this->respond(['user' => $users], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(404, $request);
         }
@@ -35,7 +35,7 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($user_id);
             $user->update($request->all());
-            return $this->respond($request, ['message' => 'User updated successfully!', 'user' => $user]);
+            return $this->respond(['message' => 'User updated successfully!', 'user' => $user], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -47,7 +47,7 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($user_id);
             $user->delete();
-            return $this->respond($request, ['message' => 'User deleted successfully!']);
+            return $this->respond(['message' => 'User deleted successfully!'], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }

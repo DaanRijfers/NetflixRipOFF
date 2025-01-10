@@ -12,7 +12,7 @@ class SubscriptionController extends Controller
     {
         try {
             $subscriptions = Subscription::all();
-            return $this->respond($request, $subscriptions);
+            return $this->respond($subscriptions, 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -28,7 +28,7 @@ class SubscriptionController extends Controller
             ]);
 
             $subscription = Subscription::create($request->all());
-            return $this->respond($request, ['message' => 'Subscription created successfully!', 'subscription' => $subscription], 201);
+            return $this->respond(['message' => 'Subscription created successfully!', 'subscription' => $subscription], 201, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -41,7 +41,7 @@ class SubscriptionController extends Controller
             $subscription = Subscription::findOrFail($subscription_id);
             $subscription->update($request->all());
 
-            return $this->respond($request, ['message' => 'Subscription updated successfully!', 'subscription' => $subscription]);
+            return $this->respond(['message' => 'Subscription updated successfully!', 'subscription' => $subscription], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -54,7 +54,7 @@ class SubscriptionController extends Controller
             $subscription = Subscription::findOrFail($subscription_id);
             $subscription->delete();
 
-            return $this->respond($request, ['message' => 'Subscription deleted successfully!']);
+            return $this->respond(['message' => 'Subscription deleted successfully!'], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }

@@ -86,11 +86,13 @@ class AuthController extends Controller
     // Helper function for generating JWT token
     protected function respondWithToken($token, $request)
     {
-        return $this->respond(["message" => [
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
-            'user' => auth()->user(),
+        return $this->respond([
+            'message' => 'Logged in succesfully!',
+            'user' => [
+                'access_token' => $token,
+                'token_type' => 'bearer',
+                'expires_in' => auth()->factory()->getTTL() * 60,
+                'user' => auth()->user(),
         ]], 200, $request);
     }
 }

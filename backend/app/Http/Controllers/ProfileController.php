@@ -19,7 +19,7 @@ class ProfileController extends Controller
     {
         try {
             $profiles = Profile::all();
-            return $this->respond($request, ['profiles' => $profiles]);
+            return $this->respond(['profiles' => $profiles], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -90,7 +90,7 @@ class ProfileController extends Controller
                 return $this->respondWithError(404, $request);
             }
 
-            return $this->respond($request, $profiles->toArray());
+            return $this->respond($profiles->toArray(), 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
