@@ -4,9 +4,16 @@ set -e
 
 echo "Starting Laravel setup..."
 
+# Install Composer if not already installed
+if ! command -v composer &> /dev/null; then
+    echo "Composer not found. Installing Composer..."
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer || { echo "Composer installation failed! Exiting."; exit 1; }
+    echo "Composer installed successfully."
+fi
+
 # Install Composer dependencies
 echo "Installing Composer dependencies..."
-composer install || { echo "Composer install failed! Exiting."; exit 1; }
+composer install --no-interaction --prefer-dist --optimize-autoloader || { echo "Composer install failed! Exiting."; exit 1; }
 echo "Composer dependencies installed."
 
 # Define the path to the root .env file (relative to where docker-compose.yml is mounted)
@@ -68,6 +75,7 @@ echo "Database is ready!"
 # Clear and cache configuration
 echo "Clearing and caching configuration..."
 php artisan config:clear && php artisan config:cache || { echo "Configuration caching failed! Exiting."; exit 1; }
+composer dump-autoload
 echo "Configuration cleared and cached."
 
 echo "Running database migrations..."
@@ -101,6 +109,9 @@ if [ "$SEEDING" = "true" ]; then
 else
     echo "SEEDING is disabled. Skipping database seeders."
 fi
+
+echo "Revoking database permissions..."
+php artisan db:seed --class=GrantRevokePermissionsSeeder 
 
 echo "Database setup completed."
 
