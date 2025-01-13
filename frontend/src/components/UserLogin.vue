@@ -12,6 +12,7 @@
       <button type="submit">Login</button>
       <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
       <div v-if="jwtSecretError" class="error">JWT secret is not set. Please contact support.</div>
+      <div v-if="successMessage" class="success">{{ successMessage }}</div>
     </form>
   </div>
 </template>
@@ -24,8 +25,8 @@ export default {
     return {
       email: '',
       password: '',
-      errorMessage: '',
-      jwtSecretError: false
+      jwtSecretError: false,
+      successMessage: ''
     };
   },
   methods: {
@@ -38,10 +39,10 @@ export default {
         if (response.data.message === 'JWT secret is not set') {
           this.jwtSecretError = true;
         } else {
-          return "Je bent ingelogd";
+          this.successMessage = "Je bent ingelogd";
         }
       } catch (error) {
-        this.errorMessage = error.response.data.message || 'Login failed';
+        this.errorMessage = `Failed to login: ${error.response ? error.response.data.message : error.message}`;
       }
     }
   }

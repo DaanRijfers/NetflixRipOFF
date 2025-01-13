@@ -24,12 +24,12 @@ export default {
   methods: {
     async resetPassword() {
       try {
-        const response = await axios.post('http://localhost:8000/api/reset-password', {
+        const response = await axios.post('http://localhost:8000/api/auth/password-reset', {
           email: this.email
         });
         alert(response.data.message);
       } catch (error) {
-        alert('Failed to send reset link');
+        alert(`Failed to send reset link: ${error.response ? error.response.data.message : error.message}. Please check if the route [password.reset] is defined in your backend.`);
       }
     }
   }

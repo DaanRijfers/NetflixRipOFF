@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Route; 
 
 class AuthController extends Controller
 {
@@ -66,22 +67,19 @@ class AuthController extends Controller
 
     // Reset password
     public function resetPassword(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|string|email',
-        ]);
+{
+    $request->validate([
+        'email' => 'required|string|email',
+    ]);
 
-        $user = User::where('email', $request->email)->first();
-        if (!$user) {
-            return $this->respondWithError(404, $request);
-        }
+    $status = Password::sendResetLink($request->only('email'));
 
-        $status = Password::sendResetLink($request->only('email'));
-
-        return $status === Password::RESET_LINK_SENT
-            ? $this->respond(['message' => 'Password reset link sent!'], 200, $request)
-            : $this->respondWithError(400, $request);
+    if ($status === Password::RESET_LINK_SENT) {
+        return response()->json(['message' => 'Password reset link sent!'], 200);
+    } else {
+        return response()->json(['message' => 'Failed to send reset link'], 400);
     }
+}
 
     // Helper function for generating JWT token
     protected function respondWithToken($token, $request)

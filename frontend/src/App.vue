@@ -4,6 +4,7 @@
       <router-link to="/login">Login</router-link>
       <router-link to="/register">Register</router-link>
       <router-link to="/reset-password">Reset Password</router-link>
+      <router-link to="/admin-panel">Admin Panel</router-link>
     </nav>
     <router-view></router-view>
   </div>
