@@ -2,6 +2,14 @@
 
 set -e
 
+# Wait for the database to be operational
+echo "Waiting for database to be ready at $DB_HOST:$DB_PORT..."
+until nc -z "$DB_HOST" "$DB_PORT"; do
+    echo "Database is unavailable - retrying..."
+    sleep 1
+done
+echo "Database is ready!"
+
 echo "Starting Laravel setup..."
 
 # Install Composer if not already installed
@@ -64,24 +72,11 @@ else
     echo "APP_KEY already exists and is not empty."
 fi
 
-# Wait for the database to be operational
-echo "Waiting for database to be ready at $DB_HOST:$DB_PORT..."
-until nc -z "$DB_HOST" "$DB_PORT"; do
-    echo "Database is unavailable - retrying..."
-    sleep 1
-done
-echo "Database is ready!"
-
 # Clear and cache configuration
 echo "Clearing and caching configuration..."
 php artisan config:clear && php artisan config:cache || { echo "Configuration caching failed! Exiting."; exit 1; }
 composer dump-autoload
 echo "Configuration cleared and cached."
-
-echo "Running database migrations..."
-
-# Run migrations
-php artisan migrate --force || { echo "Migrations failed! Exiting."; exit 1; }
 
 # Load environment variables from the root .env file with debug logging
 if [ -f "$ROOT_ENV_FILE" ]; then
