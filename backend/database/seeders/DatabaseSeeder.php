@@ -58,6 +58,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\procedures\UserStoredProcedureSeeder::class,
             \Database\Seeders\procedures\UserInvitationsStoredProcedureSeeder::class,
             \Database\Seeders\procedures\WatchlistStoredProcedureSeeder::class,
+            \Database\Seeders\procedures\DropSetupUserStoredProcedureSeeder::class,
         ]);
 
         $this->command->info('Stored procedures created successfully.');

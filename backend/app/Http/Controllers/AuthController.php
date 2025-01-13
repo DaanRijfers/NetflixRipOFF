@@ -7,18 +7,28 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Route; 
+use Illuminate\Support\Facades\Route;
 
 class AuthController extends Controller
 {
     // Register user
     public function register(Request $request)
     {
+        // Validate the request
         $request->validate([
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'confirmPassword' => 'required|string|same:password', // Ensure confirmPassword matches password
+            'favoriteAnimal' => 'required|string|max:255', // Validate favorite animal(This has to change but for now I do it like this, this needs to be the profile image that get created with register)
+            'captcha' => 'required|string', // Validate CAPTCHA
         ]);
 
+        // Verify CAPTCHA (assuming the CAPTCHA is generated and validated on the frontend)
+        if ($request->captcha !== $request->session()->get('captcha')) {
+            return $this->respond(['message' => 'CAPTCHA verification failed.'], 422, $request);
+        }
+
+        // Create the user
         $user = User::create([
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -34,12 +44,12 @@ class AuthController extends Controller
             'email' => 'required|string',
             'password' => 'required|string',
         ]);
-    
+
         $credentials = $request->only('email', 'password');
-    
+
         if (!$token = auth()->attempt($credentials)) {
             $user = User::where('email', $request->email)->first();
-    
+
             if ($user) {
                 $user->increment('failed_login_attempts');
                 if ($user->failed_login_attempts >= 3) {
@@ -47,10 +57,10 @@ class AuthController extends Controller
                 }
                 $user->save();
             }
-    
+
             return $this->respond(['message' => 'Invalid credentials'], 401, $request);
         }
-    
+
         $user = auth()->user();
         $user->failed_login_attempts = 0;
         $user->save();
@@ -67,30 +77,37 @@ class AuthController extends Controller
 
     // Reset password
     public function resetPassword(Request $request)
-{
-    $request->validate([
-        'email' => 'required|string|email',
-    ]);
+    {
+        $request->validate([
+            'email' => 'required|string|email',
+        ]);
 
-    $status = Password::sendResetLink($request->only('email'));
+        $status = Password::sendResetLink($request->only('email'));
 
-    if ($status === Password::RESET_LINK_SENT) {
-        return response()->json(['message' => 'Password reset link sent!'], 200);
-    } else {
-        return response()->json(['message' => 'Failed to send reset link'], 400);
+        if ($status === Password::RESET_LINK_SENT) {
+            return response()->json(['message' => 'Password reset link sent!'], 200);
+        } else {
+            return response()->json(['message' => 'Failed to send reset link'], 400);
+        }
     }
-}
 
     // Helper function for generating JWT token
     protected function respondWithToken($token, $request)
     {
         return $this->respond([
-            'message' => 'Logged in succesfully!',
+            'message' => 'Logged in successfully!',
             'user' => [
                 'access_token' => $token,
                 'token_type' => 'bearer',
                 'expires_in' => auth()->factory()->getTTL() * 60,
                 'user' => auth()->user(),
-        ]], 200, $request);
+            ],
+        ], 200, $request);
+    }
+
+    // General response helper
+    protected function respond($data, $status = 200, $request = null)
+    {
+        return response()->json($data, $status);
     }
 }
