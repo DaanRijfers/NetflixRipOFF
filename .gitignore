@@ -1,3 +1,3 @@
 .env
-/db-init/create-users.sql
+/db-init/sql-file/create-users.sql
 node_modules
