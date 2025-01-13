@@ -1,15 +1,10 @@
-# Laravel Database Configuration
+# Laravel Database Configuration (User should be api user)
 DB_PORT=3306
-DB_HOST=db                   
+DB_HOST=MariaDB                   
 DB_NAME=              
 DB_USER=              
 DB_PASSWORD=   
 SEEDING=true
-
-# MariaDB Container Configuration
-DB_CONTAINER_DATABASE=
-DB_CONTAINER_USER=
-DB_CONTAINER_PASSWORD=
 
 # Laravel JTW secret
 JWT_CONTAINER_SECRET="example"

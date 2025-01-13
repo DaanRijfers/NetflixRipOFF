@@ -3,14 +3,28 @@ services:
     image: alpine:latest
     container_name: sql-generator
     volumes:
-      - ./db-init:/db-init:z  # Make sure the db-init folder is correctly mapped
-    working_dir: /app  # Working directory should be /app as you are running scripts from there
+      - ./db-init:/db-init:z
+    working_dir: /app
     environment:
       - MYSQL_DATABASE=${DB_NAME}
       - MYSQL_USER=${DB_USER}
       - MYSQL_PASSWORD=${DB_PASSWORD}
-    entrypoint: /bin/sh -c "apk update && apk add gettext && echo 'Running SQL generation script...'; /db-init/generate-sql.sh; echo 'SQL file generated successfully!';" 
-
+    entrypoint: /bin/sh -c "
+      apk update && apk add gettext dos2unix &&  
+      echo 'Listing /db-init directory:'; ls -l /db-init && 
+      if [ -f /db-init/generate-sql.sh ]; then 
+        echo 'Converting generate-sql.sh to Unix line endings...'; 
+        dos2unix /db-init/generate-sql.sh;  
+        echo 'Making generate-sql.sh executable...'; 
+        chmod +x /db-init/generate-sql.sh;  
+        echo 'Checking script permissions:'; ls -l /db-init/generate-sql.sh; 
+        echo 'Running SQL generation script...'; 
+        /bin/sh -x /db-init/generate-sql.sh;  
+        echo 'SQL file generated successfully!'; 
+      else 
+        exit 1; 
+      fi"
+      
   mariadb:
     image: mariadb:10.11 
     depends_on:
