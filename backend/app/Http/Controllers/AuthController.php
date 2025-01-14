@@ -20,12 +20,11 @@ class AuthController extends Controller
             'password' => 'required|string|min:8',
             'confirmPassword' => 'required|string|same:password', // Ensure confirmPassword matches password
             'favoriteAnimal' => 'required|string|max:255', // Validate favorite animal(This has to change but for now I do it like this, this needs to be the profile image that get created with register)
-            'captcha' => 'required|string', // Validate CAPTCHA
         ]);
 
-        // Verify CAPTCHA (assuming the CAPTCHA is generated and validated on the frontend)
-        if ($request->captcha !== $request->session()->get('captcha')) {
-            return $this->respond(['message' => 'CAPTCHA verification failed.'], 422, $request);
+        $data = $request->all();
+        if ($data['password'] !== $data['confirmPassword']) {
+            return $this->respond(['message' => 'The confirm password field does not match.'], 422, $request);
         }
 
         // Create the user

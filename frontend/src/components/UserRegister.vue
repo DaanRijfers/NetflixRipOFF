@@ -18,13 +18,6 @@
         <label for="favoriteAnimal">Favorite Animal:</label>
         <input type="text" id="favoriteAnimal" v-model="favoriteAnimal" required placeholder="Enter your favorite animal" />
       </div>
-      <div class="form-group">
-        <label for="captcha">CAPTCHA:</label>
-        <div class="captcha-container">
-          <span class="captcha-text">{{ captchaText }}</span>
-          <input type="text" id="captcha" v-model="captchaInput" required placeholder="Enter the CAPTCHA" />
-        </div>
-      </div>
       <button type="submit" class="register-button">Register</button>
     </form>
   </div>
@@ -41,33 +34,20 @@ export default {
       password: '',
       confirmPassword: '',
       favoriteAnimal: '',
-      captchaText: this.generateCaptcha(),
-      captchaInput: ''
     };
   },
   methods: {
-    generateCaptcha() {
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let captcha = '';
-      for (let i = 0; i < 6; i++) {
-        captcha += characters.charAt(Math.floor(Math.random() * characters.length));
-      }
-      return captcha;
-    },
     async register() {
       if (this.password !== this.confirmPassword) {
         alert('Passwords do not match.');
-        return;
-      }
-      if (this.captchaInput !== this.captchaText) {
-        alert('CAPTCHA verification failed.');
         return;
       }
       try {
         const response = await axios.post('http://localhost:8000/api/auth/register', {
           email: this.email,
           password: this.password,
-          favoriteAnimal: this.favoriteAnimal
+          confirmPassword: this.confirmPassword,
+          favoriteAnimal: this.favoriteAnimal,
         });
         alert(response.data.message);
       } catch (error) {
