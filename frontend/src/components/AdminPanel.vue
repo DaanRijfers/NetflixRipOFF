@@ -83,6 +83,28 @@
         </table>
       </div>
     </div>
+
+    <!-- Favorite Content Section -->
+    <div class="w-full max-w-5xl mt-6">
+      <h2 class="text-xl font-bold mb-4">Favorite Content</h2>
+      <div v-if="loadingFavoriteContent" class="text-white">Loading favorite content...</div>
+      <div v-else class="overflow-x-auto">
+        <table class="min-w-full bg-gray-800 border border-gray-700">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 border border-gray-700">User</th>
+              <th class="px-4 py-2 border border-gray-700">Content Title</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in favoriteContent" :key="item.id" class="hover:bg-gray-700">
+              <td class="px-4 py-2 border border-gray-700">{{ item.userName }}</td>
+              <td class="px-4 py-2 border border-gray-700">{{ item.title }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -104,6 +126,10 @@ const loadingContent = ref(true);
 // State for subscriptions
 const subscriptions = ref([]);
 const loadingSubscriptions = ref(true);
+
+// State for favorite content
+const favoriteContent = ref([]);
+const loadingFavoriteContent = ref(true);
 
 // Fetch data on component mount
 const fetchUsers = async () => {
@@ -165,7 +191,6 @@ const fetchSubscriptions = async () => {
     loadingSubscriptions.value = false;
   }
 };
-
 onMounted(() => {
   fetchUsers();
   fetchProfiles();

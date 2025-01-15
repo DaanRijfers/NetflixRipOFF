@@ -10,10 +10,12 @@
 
       <!-- Navigation Bar -->
       <nav>
-        <router-link to="/login">Login</router-link>
-        <router-link to="/register">Register</router-link>
-        <router-link to="/reset-password">Reset Password</router-link>
-        <router-link to="/admin-panel">Admin Panel</router-link>
+        <router-link to="/login" v-if="!isLoggedIn">Login</router-link>
+        <router-link to="/register" v-if="!isLoggedIn">Register</router-link>
+        <router-link to="/reset-password" v-if="!isLoggedIn">Reset Password</router-link>
+        <router-link to="/admin-panel" v-if="isLoggedIn">Admin Panel</router-link>
+        <router-link to="/profile" v-if="isLoggedIn">Profile</router-link>
+        <router-link to="/logout" v-if="isLoggedIn">Logout</router-link>
       </nav>
 
       <!-- Content -->
@@ -26,7 +28,15 @@
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
+  data() {
+    return {
+      isLoggedIn: false
+    };
+  },
+  created() {
+    this.isLoggedIn = !!localStorage.getItem('token'); // Assuming token is stored in localStorage
+  }
 };
 </script>
 

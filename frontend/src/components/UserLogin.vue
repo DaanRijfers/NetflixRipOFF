@@ -27,7 +27,8 @@ export default {
       email: '',
       password: '',
       jwtSecretError: false,
-      successMessage: ''
+      successMessage: '',
+      errorMessage: ''
     };
   },
   methods: {
@@ -39,12 +40,19 @@ export default {
         });
         if (response.data.message === 'JWT secret is not set') {
           this.jwtSecretError = true;
+        } else if (response.data.message === 'User does not exist') {
+          this.errorMessage = 'User does not exist. Please check your email and try again.';
         } else {
-          this.successMessage = "Je bent ingelogd";
+          this.successMessage = "Login successful!";
+          localStorage.setItem('token', response.data.token); // Store token in localStorage
+          this.redirectUser();
         }
       } catch (error) {
         this.errorMessage = `Failed to login: ${error.response ? error.response.data.message : error.message}`;
       }
+    },
+    redirectUser() {
+      this.$router.push('/admin-panel');
     }
   }
 };
