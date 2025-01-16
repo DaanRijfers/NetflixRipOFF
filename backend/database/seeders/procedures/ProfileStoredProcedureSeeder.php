@@ -34,6 +34,11 @@ class ProfileStoredProcedureSeeder extends Seeder
             BEGIN
                 DELETE FROM profiles WHERE id = profileId;
             END;
+
+            CREATE PROCEDURE GetFavoriteContentByUserId(IN userId INT)
+            BEGIN
+                SELECT * FROM favorite_content WHERE user_id = userId;
+            END;
         ');
     }
 }
