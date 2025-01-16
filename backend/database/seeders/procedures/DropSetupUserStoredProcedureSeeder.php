@@ -12,9 +12,17 @@ class DropSetupUserStoredProcedureSeeder extends Seeder
      */
     public function run(): void
     {
-        // Drops the setup_user if it exists
-        DB::connection('setup_user')->unprepared("
-            CREATE OR REPLACE PROCEDURE DropSetupUser()
+        $procedureName = 'DropSetupUser';
+
+        // Check if the procedure already exists
+        if ($this->procedureExists($procedureName)) {
+            $this->command->info("Procedure {$procedureName} already exists. Skipping.");
+            return;
+        }
+
+        // Create the procedure
+        DB::unprepared("
+            CREATE PROCEDURE {$procedureName}()
             BEGIN
                 DECLARE userCount INT;
 
@@ -33,5 +41,24 @@ class DropSetupUserStoredProcedureSeeder extends Seeder
                 END IF;
             END;
         ");
+
+        $this->command->info("Procedure {$procedureName} created successfully.");
+    }
+
+    /**
+     * Check if a stored procedure exists.
+     *
+     * @param string $procedureName
+     * @return bool
+     */
+    private function procedureExists(string $procedureName): bool
+    {
+        $result = DB::selectOne("
+            SELECT COUNT(*) AS count
+            FROM information_schema.ROUTINES
+            WHERE ROUTINE_TYPE = 'PROCEDURE' AND ROUTINE_NAME = ?
+        ", [$procedureName]);
+
+        return $result->count > 0;
     }
 }

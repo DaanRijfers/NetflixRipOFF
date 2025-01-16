@@ -9,7 +9,7 @@ SEEDING=true
 # Replication Database Configuration 
 REPLICATION_USER=
 REPLICATION_PASSWORD=
-REPLICATION_DELAY=60 # Replication lag in second
+REPLICATION_DELAY=60 
 
 # Laravel JTW secret
 JWT_CONTAINER_SECRET="example"

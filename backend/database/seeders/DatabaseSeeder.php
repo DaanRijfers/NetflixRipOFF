@@ -53,14 +53,40 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('Views created successfully.');
 
-         // Call stored procedure seeders
-         $this->call([
-            \Database\Seeders\procedures\UserStoredProcedureSeeder::class,
-            \Database\Seeders\procedures\UserInvitationsStoredProcedureSeeder::class,
-            \Database\Seeders\procedures\WatchlistStoredProcedureSeeder::class,
-            \Database\Seeders\procedures\DropSetupUserStoredProcedureSeeder::class,
-        ]);
+      // Call stored procedure seeders
+        $procedures = [
+            'UserStoredProcedure' => \Database\Seeders\procedures\UserStoredProcedureSeeder::class,
+            'UserInvitationsStoredProcedure' => \Database\Seeders\procedures\UserInvitationsStoredProcedureSeeder::class,
+            'WatchlistStoredProcedure' => \Database\Seeders\procedures\WatchlistStoredProcedureSeeder::class,
+            'DropSetupUserStoredProcedure' => \Database\Seeders\procedures\DropSetupUserStoredProcedureSeeder::class,
+        ];
+
+        foreach ($procedures as $procedureName => $seeder) {
+            if (!$this->procedureExists($procedureName)) {
+                $this->call($seeder);
+                $this->command->info("Seeded: {$seeder}");
+            } else {
+                $this->command->info("Skipped: {$seeder} (procedure '{$procedureName}' already exists)");
+            }
+        }
 
         $this->command->info('Stored procedures created successfully.');
+    }
+
+    /**
+     * Check if a stored procedure exists.
+     *
+     * @param string $procedureName
+     * @return bool
+     */
+    private function procedureExists(string $procedureName): bool
+    {
+        $result = DB::selectOne("
+            SELECT COUNT(*) AS count
+            FROM information_schema.ROUTINES
+            WHERE ROUTINE_TYPE = 'PROCEDURE' AND ROUTINE_NAME = ?
+        ", [$procedureName]);
+
+        return $result->count > 0;
     }
 }

@@ -50,7 +50,7 @@ Route::middleware('auth.ensure')->group(function () {
 Route::middleware('auth:api')->get('/auth/profile', [AuthController::class, 'profile']); // Use /auth/profile
 
 // User Profile Routes
-Route::middleware('auth:ensure')->group(function () {
+Route::middleware('auth.ensure')->group(function () {
     // Get the profile of the currently authenticated user
     Route::get('/user/profile', [ProfileController::class, 'getCurrentUserProfile']);
     
