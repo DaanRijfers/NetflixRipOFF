@@ -12,9 +12,10 @@ class Profile extends Model
     protected $fillable = [
         'user_id',
         'name',
-        'profile_picture_path',
-        'date_of_birth',
+        'favorite_animal', 
+        'media_preference',
         'language_id',
+        'profile_picture', 
     ];
 
     public function user()
@@ -32,14 +33,9 @@ class Profile extends Model
         return $this->hasMany(ProfileHistory::class);
     }
 
-    public function genrePreferences()
+    public function genres()
     {
-        return $this->belongsToMany(Genre::class, 'profile_genre_preference');
-    }
-
-    public function categoryPreferences()
-    {
-        return $this->belongsToMany(Category::class, 'profile_category_preference');
+        return $this->belongsToMany(Genre::class, 'profile_genre_preferences', 'profile_id', 'genre_id');
     }
 
     public function restrictionPreferences()

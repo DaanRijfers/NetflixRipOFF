@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\LanguageController;
 
 // Auth Routes
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -39,6 +40,22 @@ Route::middleware('auth.ensure')->group(function () {
     Route::get('/profile/{profile_id}', [ProfileController::class, 'show']);
     Route::put('/profile/{profile_id}', [ProfileController::class, 'update']);
     Route::delete('/profile/{profile_id}', [ProfileController::class, 'destroy']);
+});
+
+// Language Route
+Route::middleware('auth.ensure')->group(function () {
+    Route::get('/languages', [LanguageController::class, 'index']);
+});
+// Auth Profile Route
+Route::middleware('auth:api')->get('/auth/profile', [AuthController::class, 'profile']); // Use /auth/profile
+
+// User Profile Routes
+Route::middleware('auth:ensure')->group(function () {
+    // Get the profile of the currently authenticated user
+    Route::get('/user/profile', [ProfileController::class, 'getCurrentUserProfile']);
+    
+    // Get the favorite content of the currently authenticated user
+    Route::get('/user/favorite-content', [ProfileController::class, 'getFavoriteContent']);
 });
 
 // Content Routes

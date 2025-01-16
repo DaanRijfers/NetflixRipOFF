@@ -1,30 +1,79 @@
 <template>
   <div class="profile-container">
-    <form v-if="isLoggedIn" @submit.prevent="updateProfile" class="profile-form">
-      <h2>Profile</h2>
-      <div class="form-group">
-        <label for="name">Name:</label>
-        <input type="text" id="name" v-model="name" required />
+    <div v-if="isLoggedIn">
+      <h2>Profiles</h2>
+      <div v-if="profiles.length > 0">
+        <div v-for="profile in profiles" :key="profile.id" class="profile-card">
+          <h3>{{ profile.name }}</h3>
+          <p>Favorite Animal: {{ profile.favorite_animal }}</p>
+          <p>Media Preference: {{ profile.media_preference === 'EPISODE' ? 'Series' : 'Movie' }}</p>
+          <p>Language: {{ getLanguageName(profile.language_id) }}</p>
+          <img v-if="profile.profile_picture" :src="getProfilePictureUrl(profile.profile_picture)" alt="Profile Picture" class="profile-picture" />
+          <button @click="selectProfile(profile)">Select Profile</button>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" v-model="email" required />
+      <div v-else>
+        <p>No profiles found. Create a new profile.</p>
       </div>
-      <div class="form-group">
-        <label for="favoriteAnimal">Favorite Animal:</label>
-        <input type="text" id="favoriteAnimal" v-model="favoriteAnimal" required />
+
+      <h2>Create New Profile</h2>
+      <form @submit.prevent="createProfile" class="profile-form">
+        <div class="form-group">
+          <label for="name">Name:</label>
+          <input type="text" id="name" v-model="newProfile.name" required />
+        </div>
+        <div class="form-group">
+          <label for="favorite_animal">Favorite Animal:</label>
+          <input type="text" id="favorite_animal" v-model="newProfile.favorite_animal" required />
+        </div>
+        <div class="form-group">
+          <label for="media_preference">Media Preference:</label>
+          <select id="media_preference" v-model="newProfile.media_preference" required>
+            <option value="MOVIE">Movie</option>
+            <option value="EPISODE">Series</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="language_id">Language:</label>
+          <select id="language_id" v-model="newProfile.language_id" required>
+            <option v-for="language in languages" :key="language.id" :value="language.id">{{ language.name }}</option>
+          </select>
+        </div>
+        <button type="submit" class="update-button">Create Profile</button>
+      </form>
+
+      <div v-if="selectedProfile" class="selected-profile">
+        <h2>Selected Profile: {{ selectedProfile.name }}</h2>
+        <form @submit.prevent="updateProfile" class="profile-form">
+          <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" v-model="selectedProfile.name" required />
+          </div>
+          <div class="form-group">
+            <label for="favorite_animal">Favorite Animal:</label>
+            <input type="text" id="favorite_animal" v-model="selectedProfile.favorite_animal" required />
+          </div>
+          <div class="form-group">
+            <label for="media_preference">Media Preference:</label>
+            <select id="media_preference" v-model="selectedProfile.media_preference" required>
+              <option value="MOVIE">Movie</option>
+              <option value="EPISODE">Series</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="language_id">Language:</label>
+            <select id="language_id" v-model="selectedProfile.language_id" required>
+              <option v-for="language in languages" :key="language.id" :value="language.id">{{ language.name }}</option>
+            </select>
+          </div>
+          <button type="submit" class="update-button">Update Profile</button>
+        </form>
       </div>
-      <button type="submit" class="update-button">Update Profile</button>
+
       <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
       <div v-if="successMessage" class="success">{{ successMessage }}</div>
-    </form>
-    <div v-else class="error">You must be logged in to view this page.</div>
-    <div v-if="isLoggedIn" class="favorite-content">
-      <h2>Favorite Content</h2>
-      <ul>
-        <li v-for="item in favoriteContent" :key="item.id">{{ item.title }}</li>
-      </ul>
     </div>
+    <div v-else class="error">You must be logged in to view this page.</div>
   </div>
 </template>
 
@@ -34,51 +83,133 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      name: '',
-      email: '',
-      favoriteAnimal: '',
+      profiles: [],
+      selectedProfile: null,
+      newProfile: {
+        name: '',
+        favorite_animal: '',
+        media_preference: 'MOVIE',
+        language_id: 1,
+      },
+      languages: [],
       errorMessage: '',
       successMessage: '',
       isLoggedIn: false,
-      favoriteContent: []
     };
   },
   async created() {
     try {
-      const response = await axios.get('http://localhost:8000/api/user/profile');
+      const profileResponse = await axios.get('http://localhost:8000/api/profile', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
       this.isLoggedIn = true;
-      this.name = response.data.name;
-      this.email = response.data.email;
-      this.favoriteAnimal = response.data.favoriteAnimal;
+      this.profiles = profileResponse.data.profiles || [];
+
+      const languageResponse = await axios.get('http://localhost:8000/api/languages');
+      this.languages = languageResponse.data.languages;
     } catch (error) {
-      this.errorMessage = `Failed to load profile: ${error.response ? error.response.data.message : error.message}`;
-    }
-    try {
-      const contentResponse = await axios.get('http://localhost:8000/api/user/favorite-content');
-      this.favoriteContent = contentResponse.data;
-    } catch (error) {
-      this.errorMessage = `Failed to load favorite content: ${error.response ? error.response.data.message : error.message}`;
+      console.error('Error fetching data:', error.response ? error.response.data : error.message);
+      this.errorMessage = `Failed to load data: ${error.response ? error.response.data.message : error.message}`;
     }
   },
   methods: {
+    async fetchAnimalImage(animal) {
+      try {
+        const response = await axios.get(`https://api.unsplash.com/search/photos?query=${animal}&client_id=`);
+        if (response.data.results.length > 0) {
+          return response.data.results[0].urls.small;
+        }
+      } catch (error) {
+        console.error('Error fetching animal image:', error);
+      }
+      return null;
+    },
+    async urlToBinary(url) {
+      try {
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
+        return Buffer.from(response.data, 'binary').toString('base64');
+      } catch (error) {
+        console.error('Error converting image to binary:', error);
+        return null;
+      }
+    },
+    async createProfile() {
+      try {
+        const imageUrl = await this.fetchAnimalImage(this.newProfile.favorite_animal);
+        let profilePictureBinary = null;
+
+        if (imageUrl) {
+          profilePictureBinary = await this.urlToBinary(imageUrl);
+        }
+
+        const response = await axios.post(
+          'http://localhost:8000/api/profile',
+          {
+            ...this.newProfile,
+            profile_picture: profilePictureBinary, 
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          }
+        );
+
+        this.profiles.push(response.data.profile);
+        this.successMessage = 'Profile created successfully!';
+        this.errorMessage = '';
+      } catch (error) {
+        this.errorMessage = `Failed to create profile: ${error.response ? error.response.data.message : error.message}`;
+        this.successMessage = '';
+      }
+    },
+    selectProfile(profile) {
+      this.selectedProfile = { ...profile };
+    },
     async updateProfile() {
       try {
-        const response = await axios.put('http://localhost:8000/api/user/profile', {
-          name: this.name,
-          email: this.email,
-          favoriteAnimal: this.favoriteAnimal
-        });
-        this.successMessage = response.data.message;
+        const imageUrl = await this.fetchAnimalImage(this.selectedProfile.favorite_animal);
+        let profilePictureBinary = null;
+
+        if (imageUrl) {
+          profilePictureBinary = await this.urlToBinary(imageUrl);
+        }
+
+        const response = await axios.put(
+          `http://localhost:8000/api/profile/${this.selectedProfile.id}`,
+          {
+            ...this.selectedProfile,
+            profile_picture: profilePictureBinary, 
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          }
+        );
+
+        this.successMessage = 'Profile updated successfully!';
+        this.errorMessage = '';
+        console.log('Update response:', response.data);
       } catch (error) {
         this.errorMessage = `Failed to update profile: ${error.response ? error.response.data.message : error.message}`;
+        this.successMessage = '';
       }
-    }
-  }
+    },
+    getLanguageName(languageId) {
+      const language = this.languages.find(lang => lang.id === languageId);
+      return language ? language.name : 'Unknown';
+    },
+    getProfilePictureUrl(profilePicture) {
+      return `data:image/jpeg;base64,${profilePicture}`;
+    },
+  },
 };
 </script>
 
 <style scoped>
-/* General Styles */
 .profile-container {
   display: flex;
   justify-content: center;
@@ -88,7 +219,7 @@ export default {
 }
 
 .profile-form {
-  background: rgba(0, 0, 0, 0.8); /* Semi-transparent black */
+  background: rgba(0, 0, 0, 0.8);
   padding: 30px;
   border-radius: 15px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -99,12 +230,11 @@ export default {
 
 .profile-form h2 {
   text-align: center;
-  color: #e50914; /* Netflix red */
+  color: #e50914;
   margin-bottom: 20px;
   font-size: 2rem;
 }
 
-/* Form Group Styles */
 .form-group {
   margin-bottom: 20px;
 }
@@ -116,7 +246,8 @@ export default {
   font-size: 1rem;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 95%;
   padding: 10px;
   font-size: 1rem;
@@ -127,18 +258,18 @@ export default {
   transition: border-color 0.3s ease;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: #e50914;
 }
 
-/* Button Styles */
 .update-button {
   width: 100%;
   padding: 12px;
   font-size: 1rem;
   font-weight: bold;
-  background-color: #e50914; /* Netflix red */
+  background-color: #e50914;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -150,8 +281,8 @@ export default {
   background-color: #f40612;
 }
 
-/* Error and Success Message Styles */
-.error, .success {
+.error,
+.success {
   margin-top: 15px;
   padding: 10px;
   border-radius: 4px;
@@ -160,36 +291,31 @@ export default {
 }
 
 .error {
-  background-color: rgba(229, 9, 20, 0.2); /* Light red background */
+  background-color: rgba(229, 9, 20, 0.2);
   border: 1px solid #e50914;
   color: #e50914;
 }
 
 .success {
-  background-color: rgba(0, 128, 0, 0.2); /* Light green background */
+  background-color: rgba(0, 128, 0, 0.2);
   border: 1px solid #00ff00;
   color: #00ff00;
 }
 
-.favorite-content {
+.profile-card {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.selected-profile {
   margin-top: 20px;
 }
 
-.favorite-content h2 {
-  color: #e50914;
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-}
-
-.favorite-content ul {
-  list-style: none;
-  padding: 0;
-}
-
-.favorite-content li {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 10px;
-  margin-bottom: 5px;
+.profile-picture {
+  max-width: 100px;
   border-radius: 4px;
+  margin-top: 10px;
 }
 </style>

@@ -14,10 +14,6 @@
         <label for="confirmPassword">Confirm Password:</label>
         <input type="password" id="confirmPassword" v-model="confirmPassword" required placeholder="Confirm your password" />
       </div>
-      <div class="form-group">
-        <label for="favoriteAnimal">Favorite Animal:</label>
-        <input type="text" id="favoriteAnimal" v-model="favoriteAnimal" required placeholder="Enter your favorite animal" />
-      </div>
       <button type="submit" class="register-button">Register</button>
     </form>
   </div>
@@ -33,7 +29,6 @@ export default {
       email: '',
       password: '',
       confirmPassword: '',
-      favoriteAnimal: '',
     };
   },
   methods: {
@@ -47,9 +42,9 @@ export default {
           email: this.email,
           password: this.password,
           confirmPassword: this.confirmPassword,
-          favoriteAnimal: this.favoriteAnimal,
         });
         alert(response.data.message);
+        this.$router.push('/login'); 
       } catch (error) {
         alert(`Registration failed: ${error.response ? error.response.data.message : error.message}`);
       }

@@ -14,6 +14,10 @@
       <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
       <div v-if="jwtSecretError" class="error">JWT secret is not set. Please contact support.</div>
       <div v-if="successMessage" class="success">{{ successMessage }}</div>
+      <!-- Add a small "Reset Password" link -->
+      <div class="reset-password-link">
+        <router-link to="/reset-password">Forgot your password?</router-link>
+      </div>
     </form>
   </div>
 </template>
@@ -22,13 +26,16 @@
 import axios from 'axios';
 
 export default {
+  props: {
+    isLoggedIn: Boolean,
+  },
   data() {
     return {
       email: '',
       password: '',
       jwtSecretError: false,
       successMessage: '',
-      errorMessage: ''
+      errorMessage: '',
     };
   },
   methods: {
@@ -36,15 +43,20 @@ export default {
       try {
         const response = await axios.post('http://localhost:8000/api/auth/login', {
           email: this.email,
-          password: this.password
+          password: this.password,
         });
         if (response.data.message === 'JWT secret is not set') {
           this.jwtSecretError = true;
         } else if (response.data.message === 'User does not exist') {
           this.errorMessage = 'User does not exist. Please check your email and try again.';
         } else {
-          this.successMessage = "Login successful!";
-          localStorage.setItem('token', response.data.user.access_token);
+          this.successMessage = 'Login successful!';
+          localStorage.setItem('token', response.data.token); // Store token in localStorage
+
+          // Emit an event to notify App.vue that the user is logged in
+          this.$emit('login-success');
+
+          // Redirect the user
           this.redirectUser();
         }
       } catch (error) {
@@ -53,8 +65,8 @@ export default {
     },
     redirectUser() {
       this.$router.push('/admin-panel');
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -150,5 +162,22 @@ export default {
   background-color: rgba(0, 128, 0, 0.2); /* Light green background */
   border: 1px solid #00ff00;
   color: #00ff00;
+}
+
+/* Reset Password Link Styles */
+.reset-password-link {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.reset-password-link a {
+  color: #e50914; /* Netflix red */
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.reset-password-link a:hover {
+  color: #f40612; /* Lighter red on hover */
 }
 </style>

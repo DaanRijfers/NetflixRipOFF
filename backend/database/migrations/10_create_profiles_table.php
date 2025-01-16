@@ -13,13 +13,17 @@ return new class extends Migration
     {
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
             $table->string('name');
-            $table->string('profile_picture_path')->nullable();
-            $table->date('date_of_birth')->nullable();
+            $table->string('favorite_animal')->nullable();
             $table->enum('media_preference', ['MOVIE', 'EPISODE']);
-            $table->foreignId('language_id')->nullable()->constrained()->onDelete('set null');
+            $table->unsignedBigInteger('language_id');
+            $table->date('date_of_birth')->nullable();
+            $table->binary('profile_picture')->nullable();
             $table->timestamps();
+        
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('language_id')->references('id')->on('languages')->onDelete('cascade');
         });
     }
 

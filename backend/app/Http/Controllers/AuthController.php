@@ -19,7 +19,6 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'confirmPassword' => 'required|string|same:password', // Ensure confirmPassword matches password
-            'favoriteAnimal' => 'required|string|max:255', // Validate favorite animal(This has to change but for now I do it like this, this needs to be the profile image that get created with register)
         ]);
 
         $data = $request->all();
@@ -88,6 +87,15 @@ class AuthController extends Controller
         } else {
             return response()->json(['message' => 'Failed to send reset link'], 400);
         }
+    }
+
+    public function profile(Request $request)
+    {
+        $user = Auth::user();
+        return response()->json([
+            'message' => 'Profile fetched successfully!',
+            'user' => $user,
+        ]);
     }
 
     // Helper function for generating JWT token

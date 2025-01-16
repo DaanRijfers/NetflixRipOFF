@@ -12,7 +12,6 @@
       <nav>
         <router-link to="/login" v-if="!isLoggedIn">Login</router-link>
         <router-link to="/register" v-if="!isLoggedIn">Register</router-link>
-        <router-link to="/reset-password" v-if="!isLoggedIn">Reset Password</router-link>
         <router-link to="/admin-panel" v-if="isLoggedIn">Admin Panel</router-link>
         <router-link to="/profile" v-if="isLoggedIn">Profile</router-link>
         <router-link to="/logout" v-if="isLoggedIn">Logout</router-link>
@@ -20,7 +19,7 @@
 
       <!-- Content -->
       <div class="content">
-        <router-view></router-view>
+        <router-view :isLoggedIn="isLoggedIn" @login-success="handleLoginSuccess" @logout-success="handleLogoutSuccess"></router-view>
       </div>
     </div>
   </div>
@@ -31,12 +30,29 @@ export default {
   name: 'App',
   data() {
     return {
-      isLoggedIn: false
+      isLoggedIn: false, // Initialize as false
     };
   },
   created() {
-    this.isLoggedIn = !!localStorage.getItem('token'); // Assuming token is stored in localStorage
-  }
+    this.checkLoginStatus(); // Check login status when the app is created
+    window.addEventListener('storage', this.checkLoginStatus); // Listen for changes in localStorage
+  },
+  methods: {
+    checkLoginStatus() {
+      // Check if a token exists in localStorage
+      this.isLoggedIn = !!localStorage.getItem('token');
+      console.log('isLoggedIn:', this.isLoggedIn); // Debugging
+    },
+    handleLoginSuccess() {
+      this.isLoggedIn = true; // Update isLoggedIn when login is successful
+    },
+    handleLogoutSuccess() {
+      this.isLoggedIn = false; // Update isLoggedIn when logout is successful
+    },
+  },
+  beforeUnmount() {
+    window.removeEventListener('storage', this.checkLoginStatus); // Clean up the event listener
+  },
 };
 </script>
 

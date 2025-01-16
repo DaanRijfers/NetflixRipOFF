@@ -25,6 +25,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Profile::class);
     }
 
+    public function favoriteContent()
+    {
+        return $this->belongsToMany(Media::class, 'favorite_content', 'user_id', 'media_id');
+    }
+
     public function subscription()
     {
         return $this->belongsTo(Subscription::class);
