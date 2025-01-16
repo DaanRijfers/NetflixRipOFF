@@ -51,7 +51,7 @@ services:
       - mariadb-data:/var/lib/mysql:z
       - ./db-init/sql-files/primary/:/docker-entrypoint-initdb.d/:z
       - ./mariadb/config/primary.cnf:/etc/mysql/conf.d/primary.cnf:z
-      - ./mariadb/entrypoint.sh:/usr/local/bin/entrypoint.sh:z
+      - ./mariadb/entrypoint-primary.sh:/usr/local/bin/entrypoint.sh:z
     entrypoint: ["/bin/bash", "/usr/local/bin/entrypoint.sh"]
 
   mariadb-replica:
@@ -70,7 +70,7 @@ services:
       - mariadb-replica:/var/lib/mysql:z
       - ./db-init/sql-files/replica/:/docker-entrypoint-initdb.d/:z
       - ./mariadb/config/replica.cnf:/etc/mysql/conf.d/primary.cnf:z
-      - ./mariadb/entrypoint.sh:/usr/local/bin/entrypoint.sh:z
+      - ./mariadb/entrypoint-replica.sh:/usr/local/bin/entrypoint.sh:z
     entrypoint: ["/bin/bash", "/usr/local/bin/entrypoint.sh"]
 
   laravel:
