@@ -51,7 +51,7 @@ services:
       - mariadb-data:/var/lib/mysql:z
       - ./db-init/sql-files/primary/:/docker-entrypoint-initdb.d/:z
       - ./mariadb/config/primary.cnf:/etc/mysql/conf.d/primary.cnf:z
-      - ./mariadb/entrypoint.sh:/usr/local/bin/entrypoint.sh:z
+      - ./mariadb/entrypoint-primary.sh:/usr/local/bin/entrypoint.sh:z
     entrypoint: ["/bin/bash", "/usr/local/bin/entrypoint.sh"]
 
   mariadb-replica:
@@ -70,7 +70,7 @@ services:
       - mariadb-replica:/var/lib/mysql:z
       - ./db-init/sql-files/replica/:/docker-entrypoint-initdb.d/:z
       - ./mariadb/config/replica.cnf:/etc/mysql/conf.d/primary.cnf:z
-      - ./mariadb/entrypoint.sh:/usr/local/bin/entrypoint.sh:z
+      - ./mariadb/entrypoint-replica.sh:/usr/local/bin/entrypoint.sh:z
     entrypoint: ["/bin/bash", "/usr/local/bin/entrypoint.sh"]
 
   laravel:
@@ -81,14 +81,15 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/var/www/html:z  # Corrected with :z
-      - ./.env:/var/www/.env:z     # Corrected with :z
+      - ./backend:/var/www/html:z  # Mount the backend directory
+      - ./.env:/var/www/.env:z 
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_DATABASE=${DB_NAME}
       - DB_USERNAME=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - UNSPLASH_ACCESS_KEY=${UNSPLASH_ACCESS_KEY}
 
   vuejs:
     build:

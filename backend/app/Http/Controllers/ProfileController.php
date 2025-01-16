@@ -6,9 +6,18 @@ use App\Models\Profile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Services\UnsplashService; 
 
 class ProfileController extends Controller
 {
+    protected $unsplashService;
+
+    // Inject UnsplashService into the constructor
+    public function __construct(UnsplashService $unsplashService)
+    {
+        $this->unsplashService = $unsplashService;
+    }
+
     // Get all profiles
     public function index(Request $request)
     {
@@ -27,35 +36,41 @@ class ProfileController extends Controller
             // Validate the request
             $validator = Validator::make($request->all(), [
                 'name' => 'required|max:255',
-                'favorite_animal' => 'required|string', 
+                'favorite_animal' => 'required|string',
                 'media_preference' => 'required|in:MOVIE,EPISODE',
                 'language_id' => 'required|integer',
-                'profile_picture' => 'nullable|string', 
+                'profile_picture' => 'nullable|string', // Allow Unsplash image URL or base64
             ]);
 
             if ($validator->fails()) {
                 return $this->respondWithError(422, $request, $validator->errors());
             }
 
-            // Convert base64 image to binary
+            // Handle profile picture (can be a URL or base64)
             $profilePictureBinary = null;
             if ($request->profile_picture) {
-                $profilePictureBinary = base64_decode($request->profile_picture);
+                if (filter_var($request->profile_picture, FILTER_VALIDATE_URL)) {
+                    // If it's a URL, download the image
+                    $profilePictureBinary = file_get_contents($request->profile_picture);
+                } else {
+                    // If it's base64, decode it
+                    $profilePictureBinary = base64_decode($request->profile_picture);
+                }
             }
 
             // Create the profile
             $profile = Profile::create([
                 'user_id' => $request->user()->id,
                 'name' => $request->name,
-                'favorite_animal' => $request->favorite_animal, 
+                'favorite_animal' => $request->favorite_animal,
                 'media_preference' => $request->media_preference,
                 'language_id' => $request->language_id,
-                'profile_picture' => $profilePictureBinary, 
+                'profile_picture' => $profilePictureBinary,
             ]);
 
             return $this->respond(['message' => 'Profile created successfully!', 'profile' => $profile], 201, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError(500, $request, $e->getMessage());
         }
     }
 
@@ -78,20 +93,26 @@ class ProfileController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'name' => 'sometimes|max:255',
-                'favorite_animal' => 'sometimes|string', 
+                'favorite_animal' => 'sometimes|string',
                 'media_preference' => 'sometimes|in:MOVIE,EPISODE',
                 'language_id' => 'sometimes|exists:languages,id',
-                'profile_picture' => 'nullable|string', 
+                'profile_picture' => 'nullable|string', // Allow Unsplash image URL or base64
             ]);
 
             if ($validator->fails()) {
                 return $this->respondWithError(422, $request, $validator->errors());
             }
 
-            // Convert base64 image to binary
+            // Handle profile picture (can be a URL or base64)
             $profilePictureBinary = null;
             if ($request->profile_picture) {
-                $profilePictureBinary = base64_decode($request->profile_picture);
+                if (filter_var($request->profile_picture, FILTER_VALIDATE_URL)) {
+                    // If it's a URL, download the image
+                    $profilePictureBinary = file_get_contents($request->profile_picture);
+                } else {
+                    // If it's base64, decode it
+                    $profilePictureBinary = base64_decode($request->profile_picture);
+                }
             }
 
             // Update the profile
@@ -100,12 +121,12 @@ class ProfileController extends Controller
                 'favorite_animal' => $request->favorite_animal,
                 'media_preference' => $request->media_preference,
                 'language_id' => $request->language_id,
-                'profile_picture' => $profilePictureBinary, 
+                'profile_picture' => $profilePictureBinary,
             ])->save();
 
             return $this->respond(['message' => 'Profile updated successfully!', 'profile' => $profile], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError(500, $request, $e->getMessage());
         }
     }
 
@@ -269,6 +290,38 @@ class ProfileController extends Controller
             return $this->respond(['message' => 'Genre preference removed successfully!'], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
+        }
+    }
+
+    /**
+     * Fetch profile picture suggestions from Unsplash.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProfilePictureSuggestions(Request $request)
+    {
+        try {
+            // Validate the request
+            $validator = Validator::make($request->all(), [
+                'query' => 'required|string|max:255', // Search term for Unsplash
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondWithError(422, $request, $validator->errors());
+            }
+
+            // Fetch images from Unsplash
+            $query = $request->input('query');
+            $photos = $this->unsplashService->searchPhotos($query, 5); // Fetch 5 photos
+
+            // Return the results
+            return $this->respond([
+                'message' => 'Profile picture suggestions fetched successfully!',
+                'photos' => $photos['results'],
+            ], 200, $request);
+        } catch (\Exception $e) {
+            return $this->respondWithError(500, $request, $e->getMessage());
         }
     }
 }

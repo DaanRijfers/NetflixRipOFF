@@ -6,21 +6,13 @@ use App\Http\Controllers\ContentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\LanguageController;
 
 // Auth Routes
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware('auth.ensure');
-Route::post('/auth/password-reset', [AuthController::class, 'resetPassword']);
-
-// Password Reset Routes
-Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+Route::post('/auth/password-reset', [AuthController::class, 'resetPassword']); // Password reset route
 
 // User Routes
 Route::middleware('auth.ensure')->group(function () {
@@ -40,12 +32,14 @@ Route::middleware('auth.ensure')->group(function () {
     Route::get('/profile/{profile_id}', [ProfileController::class, 'show']);
     Route::put('/profile/{profile_id}', [ProfileController::class, 'update']);
     Route::delete('/profile/{profile_id}', [ProfileController::class, 'destroy']);
+    Route::get('/profile/picture-suggestions', [ProfileController::class, 'getProfilePictureSuggestions']);
 });
 
 // Language Route
 Route::middleware('auth.ensure')->group(function () {
     Route::get('/languages', [LanguageController::class, 'index']);
 });
+
 // Auth Profile Route
 Route::middleware('auth:api')->get('/auth/profile', [AuthController::class, 'profile']); // Use /auth/profile
 

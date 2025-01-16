@@ -33,30 +33,66 @@ class GrantRevokePermissionsSeeder extends Seeder
         // Get the database name from the .env file
         $databaseName = config('database.connections.mysql.database');
 
-        // Grant access to all tables except financial_data and privacy_data
+        // Revoke all permissions first
         try {
-            DB::connection('setup_user')->statement("GRANT SELECT, INSERT, UPDATE, DELETE ON $databaseName.* TO 'medior'@'%'");
-            DB::connection('setup_user')->statement("GRANT SELECT, INSERT, UPDATE, DELETE ON $databaseName.* TO 'junior'@'%'");
-            DB::connection('setup_user')->statement("GRANT SELECT, INSERT, UPDATE, DELETE ON $databaseName.subscriptions TO 'medior'@'%'");
-            DB::connection('setup_user')->statement("GRANT SELECT, INSERT, UPDATE, DELETE ON $databaseName.subscriptions TO 'junior'@'%'");
-            DB::connection('setup_user')->statement("GRANT SELECT, INSERT, UPDATE, DELETE ON $databaseName.users TO 'junior'@'%'");
+            DB::connection('setup_user')->statement("REVOKE ALL PRIVILEGES ON $databaseName.* FROM 'medior'@'%'");
+            DB::connection('setup_user')->statement("REVOKE ALL PRIVILEGES ON $databaseName.* FROM 'junior'@'%'");
+            // Flush privileges to apply changes
+            DB::connection('setup_user')->statement("FLUSH PRIVILEGES");
+            $this->command->info("All permissions revoked successfully.");
+        } catch (QueryException $e) {
+            $this->command->error("Error revoking all permissions: " . $e->getMessage());
+        }
+
+        // Grant permissions one by one, excluding restricted tables
+        try {
+            // List of tables to grant access
+            $tables = [
+                'users',
+                'subscriptions',
+                'genres',
+                'languages',
+                'media',
+                'media_availability_by_quality',
+                'media_genres',
+                'media_qualities',
+                'media_restrictions',
+                'media_with_details',
+                'movies_with_quality',
+                'password_reset_tokens',
+                'profile_genre_preferences',
+                'profile_histories',
+                'profile_restriction_preferences',
+                'profiles',
+                'restrictions',
+                'series_episodes_with_files',
+                'series_with_episodes',
+                'subtitles',
+                'trial_periods',
+                'user_invitations',
+                'user_with_subscription',
+                'watchlists',
+            ];
+
+            // Grant permissions to 'medior' user (excluding subscriptions and users)
+            foreach ($tables as $table) {
+                if ($table !== 'subscriptions') { // Exclude 'subscriptions' and 'users' for medior
+                    DB::connection('setup_user')->statement("GRANT SELECT, INSERT, UPDATE, DELETE ON $databaseName.$table TO 'medior'@'%'");
+                }
+            }
+
+            // Grant permissions to 'junior' user (excluding subscriptions and users)
+            foreach ($tables as $table) {
+                if ($table !== 'subscriptions' && $table !== 'users') { // Exclude 'subscriptions' and 'users' for junior
+                    DB::connection('setup_user')->statement("GRANT SELECT, INSERT, UPDATE, DELETE ON $databaseName.$table TO 'junior'@'%'");
+                }
+            }
+
             // Flush privileges to apply changes
             DB::connection('setup_user')->statement("FLUSH PRIVILEGES");
             $this->command->info("Permissions granted successfully.");
         } catch (QueryException $e) {
             $this->command->error("Error granting permissions: " . $e->getMessage());
-        }
-
-        // Revoke access to specific tables
-        try {
-            DB::connection('setup_user')->statement("REVOKE SELECT, INSERT, UPDATE, DELETE ON $databaseName.subscriptions FROM 'medior'@'%'");
-            DB::connection('setup_user')->statement("REVOKE SELECT, INSERT, UPDATE, DELETE ON $databaseName.subscriptions FROM 'junior'@'%'");
-            DB::connection('setup_user')->statement("REVOKE SELECT, INSERT, UPDATE, DELETE ON $databaseName.users FROM 'junior'@'%'");
-            // Flush privileges to apply changes
-            DB::connection('setup_user')->statement("FLUSH PRIVILEGES");
-            $this->command->info("Permissions revoked successfully.");
-        } catch (QueryException $e) {
-            $this->command->error("Error revoking permissions: " . $e->getMessage());
         }
 
         // Drop the 'setup_user' if it exists
