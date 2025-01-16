@@ -4,13 +4,18 @@ services:
     container_name: sql-generator
     volumes:
       - ./db-init:/db-init:z
-    working_dir: /app
+    working_dir: /db-init
     environment:
       - MYSQL_DATABASE=${DB_NAME}
       - MYSQL_USER=${DB_USER}
       - MYSQL_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      - DB_HOST=${DB_HOST}
+      - REPLICATION_USER=${REPLICATION_USER}
+      - REPLICATION_PASSWORD=${REPLICATION_PASSWORD}
+      - REPLICATION_DELAY=${REPLICATION_DELAY}
     entrypoint: /bin/sh -c "
-      apk update && apk add gettext dos2unix &&  
+      apk update && apk add dos2unix gettext mariadb-client &&  
       echo 'Listing /db-init directory:'; ls -l /db-init && 
       if [ -f /db-init/generate-sql.sh ]; then 
         echo 'Converting generate-sql.sh to Unix line endings...'; 
@@ -24,12 +29,17 @@ services:
       else 
         exit 1; 
       fi"
+    healthcheck:
+      test: ["CMD", "test", "-f", "/db-init/sql-files/primary/create-users.sql"]
+      interval: 5s
+      retries: 5
       
   mariadb:
     image: mariadb:10.11 
-    depends_on:
-      - sql-generator
     container_name: mariadb
+    depends_on:
+      sql-generator:
+        condition: service_healthy
     ports:
       - "3306:3306"
     environment:
@@ -38,8 +48,30 @@ services:
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
     volumes:
-      - mariadb-data:/var/lib/mysql:z # Added :z for SELinux compatibility
-      - ./db-init/sql-file:/docker-entrypoint-initdb.d:z
+      - mariadb-data:/var/lib/mysql:z
+      - ./db-init/sql-files/primary/:/docker-entrypoint-initdb.d/:z
+      - ./mariadb/config/primary.cnf:/etc/mysql/conf.d/primary.cnf:z
+      - ./mariadb/entrypoint.sh:/usr/local/bin/entrypoint.sh:z
+    entrypoint: ["/bin/bash", "/usr/local/bin/entrypoint.sh"]
+
+  mariadb-replica:
+    image: mariadb:10.11 
+    container_name: mariadb-replica
+    depends_on:
+      - mariadb
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_PASSWORD=${REPLICATION_PASSWORD}
+      - MYSQL_USER=${REPLICATION_USER}
+      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
+    volumes:
+      - mariadb-replica:/var/lib/mysql:z
+      - ./db-init/sql-files/replica/:/docker-entrypoint-initdb.d/:z
+      - ./mariadb/config/replica.cnf:/etc/mysql/conf.d/primary.cnf:z
+      - ./mariadb/entrypoint.sh:/usr/local/bin/entrypoint.sh:z
+    entrypoint: ["/bin/bash", "/usr/local/bin/entrypoint.sh"]
 
   laravel:
     build:
@@ -82,3 +114,4 @@ services:
 
 volumes:
   mariadb-data:
+  mariadb-replica:

@@ -1,10 +1,15 @@
 # Laravel Database Configuration (User should be api user)
 DB_PORT=3306
-DB_HOST=MariaDB                   
-DB_NAME=              
-DB_USER=              
-DB_PASSWORD=   
+DB_HOST=mariadb
+DB_NAME=netflixripoff
+DB_USER=
+DB_PASSWORD= 
 SEEDING=true
+
+# Replication Database Configuration 
+REPLICATION_USER=
+REPLICATION_PASSWORD=
+REPLICATION_DELAY=60 # Replication lag in second
 
 # Laravel JTW secret
 JWT_CONTAINER_SECRET="example"
