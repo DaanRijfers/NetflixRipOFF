@@ -70,6 +70,13 @@
         </form>
       </div>
 
+      <div v-if="favoriteContent.length > 0">
+        <h2>Favorite Content</h2>
+        <ul>
+          <li v-for="content in favoriteContent" :key="content.id">{{ content.title }}</li>
+        </ul>
+      </div>
+
       <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
       <div v-if="successMessage" class="success">{{ successMessage }}</div>
     </div>
@@ -95,6 +102,7 @@ export default {
       errorMessage: '',
       successMessage: '',
       isLoggedIn: false,
+      favoriteContent: [],
     };
   },
   async created() {
@@ -106,6 +114,9 @@ export default {
       });
       this.isLoggedIn = true;
       this.profiles = profileResponse.data.profiles || [];
+      if (!profileResponse.data.profiles) {
+        throw new Error('No profiles data returned from server');
+      }
 
       const languageResponse = await axios.get('http://localhost:8000/api/languages');
       this.languages = languageResponse.data.languages;
@@ -113,6 +124,7 @@ export default {
       console.error('Error fetching data:', error.response ? error.response.data : error.message);
       this.errorMessage = `Failed to load data: ${error.response ? error.response.data.message : error.message}`;
     }
+    this.fetchFavoriteContent();
   },
   methods: {
     async fetchAnimalImage(animal) {
@@ -147,9 +159,12 @@ export default {
         const response = await axios.post(
           'http://localhost:8000/api/profile',
           {
-            ...this.newProfile,
-            profile_picture: profilePictureBinary, 
-          },
+            name: this.newProfile.name,
+            favorite_animal: this.newProfile.favorite_animal,
+            media_preference: this.newProfile.media_preference,
+            language_id: this.newProfile.language_id,
+            profile_picture: profilePictureBinary || '', 
+          }, 
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -160,8 +175,14 @@ export default {
         this.profiles.push(response.data.profile);
         this.successMessage = 'Profile created successfully!';
         this.errorMessage = '';
+        this.newProfile = {
+          name: '',
+          favorite_animal: '',
+          media_preference: 'MOVIE',
+          language_id: 1,
+        };
       } catch (error) {
-        this.errorMessage = `Failed to create profile: ${error.response ? error.response.data.message : error.message}`;
+        this.errorMessage = `Failed to create profile: ${error.response && error.response.data && error.response.data.message ? error.response.data.message : error.message}`;
         this.successMessage = '';
       }
     },
@@ -196,6 +217,18 @@ export default {
       } catch (error) {
         this.errorMessage = `Failed to update profile: ${error.response ? error.response.data.message : error.message}`;
         this.successMessage = '';
+      }
+    },
+    async fetchFavoriteContent() {
+      try {
+        const response = await axios.get('http://localhost:8000/api/user/favorite-content', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        this.favoriteContent = response.data.favoriteContent;
+      } catch (error) {
+        console.error('Error fetching favorite content:', error.response ? error.response.data : error.message);
       }
     },
     getLanguageName(languageId) {

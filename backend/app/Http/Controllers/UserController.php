@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -12,8 +13,8 @@ class UserController extends Controller
     public function index(Request $request)
     {
         try {
-            $users = User::all();
-            return $this->respond(['message' => 'Users fetched succesfully!', 'users' => $users], 200, $request);
+            $users = DB::select('CALL GetAllUsers()');
+            return $this->respond(['message' => 'Users fetched successfully!', 'users' => $users], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -23,8 +24,8 @@ class UserController extends Controller
     public function show(Request $request, $user_id)
     {
         try {
-            $user = User::findOrFail($user_id);
-            return $this->respond(['message' => 'User fetched succesfuly!', 'user' => $user], 200, $request);
+            $user = DB::select('CALL GetUserById(?)', [$user_id]);
+            return $this->respond(['message' => 'User fetched successfully!', 'user' => $user], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(404, $request);
         }
@@ -34,8 +35,8 @@ class UserController extends Controller
     public function update(Request $request, $user_id)
     {
         try {
-            $user = User::findOrFail($user_id);
-            $user->update($request->all());
+            DB::statement('CALL UpdateUser(?, ?)', [$user_id, json_encode($request->all())]);
+            $user = DB::select('CALL GetUserById(?)', [$user_id]);
             return $this->respond(['message' => 'User updated successfully!', 'user' => $user], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
@@ -46,8 +47,7 @@ class UserController extends Controller
     public function destroy(Request $request, $user_id)
     {
         try {
-            $user = User::findOrFail($user_id);
-            $user->delete();
+            DB::statement('CALL DeleteUser(?)', [$user_id]);
             return $this->respond(['message' => 'User deleted successfully!'], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);

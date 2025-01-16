@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Services\UnsplashService; 
+use Illuminate\Support\Facades\DB;
 
 class ProfileController extends Controller
 {
@@ -21,12 +22,12 @@ class ProfileController extends Controller
     // Get all profiles
     public function index(Request $request)
     {
-        // Fetch profiles logic here
-        $profiles = []; // Replace with actual data fetching logic
-        return response()->json([
-            'message' => 'Profiles fetched successfully!',
-            'profiles' => $profiles,
-        ]);
+        try {
+            $profiles = DB::select('CALL GetAllProfiles()');
+            return $this->respond(['message' => 'Profiles fetched successfully!', 'profiles' => $profiles], 200, $request);
+        } catch (\Exception $e) {
+            return $this->respondWithError(500, $request);
+        }
     }
 
     // Create new profile
@@ -58,16 +59,15 @@ class ProfileController extends Controller
                 }
             }
 
-            // Create the profile
-            $profile = Profile::create([
-                'user_id' => $request->user()->id,
-                'name' => $request->name,
-                'favorite_animal' => $request->favorite_animal,
-                'media_preference' => $request->media_preference,
-                'language_id' => $request->language_id,
-                'profile_picture' => $profilePictureBinary,
+            DB::statement('CALL CreateProfile(?, ?, ?, ?, ?, ?)', [
+                $request->user()->id,
+                $request->name,
+                $request->favorite_animal,
+                $request->media_preference,
+                $request->language_id,
+                $profilePictureBinary
             ]);
-
+            $profile = DB::select('CALL GetProfileById(?)', [DB::getPdo()->lastInsertId()]);
             return $this->respond(['message' => 'Profile created successfully!', 'profile' => $profile], 201, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request, $e->getMessage());
@@ -78,7 +78,7 @@ class ProfileController extends Controller
     public function show(Request $request, $profile_id)
     {
         try {
-            $profile = Profile::findOrFail($profile_id);
+            $profile = DB::select('CALL GetProfileById(?)', [$profile_id]);
             return $this->respond(['message' => 'Profile fetched successfully!', 'profile' => $profile], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(404, $request);
@@ -115,15 +115,8 @@ class ProfileController extends Controller
                 }
             }
 
-            // Update the profile
-            $profile->fill([
-                'name' => $request->name,
-                'favorite_animal' => $request->favorite_animal,
-                'media_preference' => $request->media_preference,
-                'language_id' => $request->language_id,
-                'profile_picture' => $profilePictureBinary,
-            ])->save();
-
+            DB::statement('CALL UpdateProfile(?, ?)', [$profile_id, json_encode(array_merge($request->all(), ['profile_picture' => $profilePictureBinary]))]);
+            $profile = DB::select('CALL GetProfileById(?)', [$profile_id]);
             return $this->respond(['message' => 'Profile updated successfully!', 'profile' => $profile], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request, $e->getMessage());
@@ -134,8 +127,7 @@ class ProfileController extends Controller
     public function destroy(Request $request, $profile_id)
     {
         try {
-            $profile = Profile::findOrFail($profile_id);
-            $profile->delete();
+            DB::statement('CALL DeleteProfile(?)', [$profile_id]);
             return $this->respond(['message' => 'Profile deleted successfully!'], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);

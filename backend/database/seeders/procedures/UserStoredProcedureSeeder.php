@@ -61,5 +61,38 @@ class UserStoredProcedureSeeder extends Seeder
                 DEALLOCATE PREPARE stmt;
             END;
         ");
+
+        // Get all users
+        DB::unprepared("
+            CREATE PROCEDURE GetAllUsers()
+            BEGIN
+                SELECT * FROM users;
+            END;
+        ");
+
+        // Get user by ID
+        DB::unprepared("
+            CREATE PROCEDURE GetUserById(
+                IN userId INT
+            )
+            BEGIN
+                SELECT * FROM users 
+                WHERE id = userId;
+            END;
+        ");
+
+        // Update user
+        DB::unprepared("
+            CREATE PROCEDURE UpdateUser(
+                IN userId INT, 
+                IN userData JSON
+            )
+            BEGIN
+                UPDATE users 
+                SET name = JSON_UNQUOTE(JSON_EXTRACT(userData, '$.name')), 
+                    email = JSON_UNQUOTE(JSON_EXTRACT(userData, '$.email')) 
+                WHERE id = userId;
+            END;
+        ");
     }
 }

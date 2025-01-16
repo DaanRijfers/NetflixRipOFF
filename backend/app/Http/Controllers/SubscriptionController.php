@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Subscription;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SubscriptionController extends Controller
 {
@@ -11,8 +12,8 @@ class SubscriptionController extends Controller
     public function index(Request $request)
     {
         try {
-            $subscriptions = Subscription::all();
-            return $this->respond(['message' => 'Succesfully fetched subscriptions', 'subscription' => $subscriptions], 200, $request);
+            $subscriptions = DB::select('CALL GetAllSubscriptions()');
+            return $this->respond(['message' => 'Successfully fetched subscriptions', 'subscriptions' => $subscriptions], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -27,7 +28,8 @@ class SubscriptionController extends Controller
                 'plan' => 'required|string',
             ]);
 
-            $subscription = Subscription::create($request->all());
+            DB::statement('CALL CreateSubscription(?, ?)', [$request->user_id, $request->plan]);
+            $subscription = DB::select('CALL GetSubscriptionById(?)', [DB::getPdo()->lastInsertId()]);
             return $this->respond(['message' => 'Subscription created successfully!', 'subscription' => $subscription], 201, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
@@ -38,9 +40,8 @@ class SubscriptionController extends Controller
     public function update(Request $request, $subscription_id)
     {
         try {
-            $subscription = Subscription::findOrFail($subscription_id);
-            $subscription->update($request->all());
-
+            DB::statement('CALL UpdateSubscription(?, ?)', [$subscription_id, json_encode($request->all())]);
+            $subscription = DB::select('CALL GetSubscriptionById(?)', [$subscription_id]);
             return $this->respond(['message' => 'Subscription updated successfully!', 'subscription' => $subscription], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
@@ -51,9 +52,7 @@ class SubscriptionController extends Controller
     public function destroy(Request $request, $subscription_id)
     {
         try {
-            $subscription = Subscription::findOrFail($subscription_id);
-            $subscription->delete();
-
+            DB::statement('CALL DeleteSubscription(?)', [$subscription_id]);
             return $this->respond(['message' => 'Subscription deleted successfully!'], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
