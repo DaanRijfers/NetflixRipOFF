@@ -53,21 +53,20 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('Views created successfully.');
 
-      // Call stored procedure seeders
+        // Call stored procedure seeders
         $procedures = [
             'UserStoredProcedure' => \Database\Seeders\procedures\UserStoredProcedureSeeder::class,
             'UserInvitationsStoredProcedure' => \Database\Seeders\procedures\UserInvitationsStoredProcedureSeeder::class,
             'WatchlistStoredProcedure' => \Database\Seeders\procedures\WatchlistStoredProcedureSeeder::class,
             'DropSetupUserStoredProcedure' => \Database\Seeders\procedures\DropSetupUserStoredProcedureSeeder::class,
+            'LoginUser' => \Database\Seeders\Procedures\LoginUserStoredProcedureSeeder::class,
+            'RegisterUser' => \Database\Seeders\Procedures\RegisterUserStoredProcedureSeeder::class,
+            'ResetPassword' => \Database\Seeders\Procedures\ResetPasswordStoredProcedureSeeder::class,
         ];
 
         foreach ($procedures as $procedureName => $seeder) {
-            if (!$this->procedureExists($procedureName)) {
-                $this->call($seeder);
-                $this->command->info("Seeded: {$seeder}");
-            } else {
-                $this->command->info("Skipped: {$seeder} (procedure '{$procedureName}' already exists)");
-            }
+            $this->call($seeder);
+            $this->command->info("Seeded: {$seeder}");
         }
 
         $this->command->info('Stored procedures created successfully.');
