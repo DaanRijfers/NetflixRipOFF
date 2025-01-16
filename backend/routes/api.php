@@ -41,8 +41,6 @@ Route::middleware('auth.ensure')->group(function () {
     Route::delete('/profile/{profile_id}', [ProfileController::class, 'destroy']);
 });
 
-Route::middleware('auth:api')->get('/profile', [AuthController::class, 'profile']);
-
 // Content Routes
 Route::middleware('auth.ensure')->group(function () {
     Route::get('/content', [ContentController::class, 'index']);

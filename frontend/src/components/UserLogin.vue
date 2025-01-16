@@ -44,7 +44,7 @@ export default {
           this.errorMessage = 'User does not exist. Please check your email and try again.';
         } else {
           this.successMessage = "Login successful!";
-          localStorage.setItem('token', response.data.token); // Store token in localStorage
+          localStorage.setItem('token', response.data.user.access_token);
           this.redirectUser();
         }
       } catch (error) {
