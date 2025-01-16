@@ -81,14 +81,15 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/var/www/html:z  # Corrected with :z
-      - ./.env:/var/www/.env:z     # Corrected with :z
+      - ./backend:/var/www/html:z  # Mount the backend directory
+      - ./.env:/var/www/.env:z 
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_DATABASE=${DB_NAME}
       - DB_USERNAME=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - UNSPLASH_ACCESS_KEY=${UNSPLASH_ACCESS_KEY}
 
   vuejs:
     build:
