@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Services\UnsplashService; 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
@@ -169,21 +170,6 @@ class ProfileController extends Controller
         }
     }
 
-    // Get the favorite content of the currently authenticated user
-    public function getFavoriteContent(Request $request)
-    {
-        try {
-            // Get the authenticated user
-            $user = $request->user();
-
-            // Fetch the favorite content associated with the user
-            $favoriteContent = $user->favoriteContent;
-
-            return $this->respond(['message' => 'Favorite content fetched successfully!', 'favoriteContent' => $favoriteContent], 200, $request);
-        } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
-        }
-    }
 
     // Create a new profile for the authenticated user
     public function createProfile(Request $request)
@@ -315,5 +301,22 @@ class ProfileController extends Controller
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request, $e->getMessage());
         }
+    }
+
+    public function getCurrentUserProfile()
+    {
+        $userId = Auth::id();
+        $profiles = DB::select('CALL GetAllProfiles()');
+        $userProfiles = array_filter($profiles, function($profile) use ($userId) {
+            return $profile->user_id == $userId;
+        });
+        return response()->json(['profiles' => $userProfiles]);
+    }
+
+    public function getFavoriteContent()
+    {
+        $userId = Auth::id();
+        $favoriteContent = DB::select('CALL GetFavoriteContentByUserId(?)', [$userId]);
+        return response()->json(['favoriteContent' => $favoriteContent]);
     }
 }
