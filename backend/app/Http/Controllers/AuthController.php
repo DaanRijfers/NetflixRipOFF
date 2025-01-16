@@ -45,7 +45,7 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        if (!$token = auth()->attempt($credentials)) {
+        if (!$token = auth('api')->attempt($credentials)) {
             $user = User::where('email', $request->email)->first();
 
             if ($user) {
@@ -59,7 +59,7 @@ class AuthController extends Controller
             return $this->respond(['message' => 'Invalid credentials'], 401, $request);
         }
 
-        $user = auth()->user();
+        $user = auth('api')->user();
         $user->failed_login_attempts = 0;
         $user->save();
 
@@ -106,8 +106,8 @@ class AuthController extends Controller
             'user' => [
                 'access_token' => $token,
                 'token_type' => 'bearer',
-                'expires_in' => auth()->factory()->getTTL() * 60,
-                'user' => auth()->user(),
+                'expires_in' => auth('api')->factory()->getTTL() * 60,
+                'user' => auth('api')->user(),
             ],
         ], 200, $request);
     }
