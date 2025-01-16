@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -26,13 +28,13 @@ class AuthController extends Controller
             return $this->respond(['message' => 'The confirm password field does not match.'], 422, $request);
         }
 
-        // Create the user
-        $user = User::create([
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $email = $request->input('email');
+        $password = Hash::make($request->input('password'));
 
-        return $this->respond(['message' => 'User registered successfully!', 'user' => $user], 201, $request);
+        DB::statement('CALL RegisterUser(?, ?, @message)', [$email, $password]);
+        $message = DB::select('SELECT @message AS message')[0]->message;
+
+        return response()->json(['message' => $message], 200);
     }
 
     // Login user
@@ -43,27 +45,21 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $credentials = $request->only('email', 'password');
+        $email = $request->input('email');
+        $password = $request->input('password');
 
-        if (!$token = auth()->attempt($credentials)) {
-            $user = User::where('email', $request->email)->first();
+        DB::statement('CALL LoginUser(?, @user_id, @hashed_password, @message)', [$email]);
+        $message = DB::select('SELECT @message AS message')[0]->message;
+        $user_id = DB::select('SELECT @user_id AS user_id')[0]->user_id;
+        $hashed_password = DB::select('SELECT @hashed_password AS hashed_password')[0]->hashed_password;
 
-            if ($user) {
-                $user->increment('failed_login_attempts');
-                if ($user->failed_login_attempts >= 3) {
-                    return $this->respond(['message' => 'Account locked. Please reset your password.'], 423, $request);
-                }
-                $user->save();
-            }
-
-            return $this->respond(['message' => 'Invalid credentials'], 401, $request);
+        if ($message === 'User found' && Hash::check($password, $hashed_password)) {
+            // Generate a token (for simplicity, using a UUID here)
+            $token = (string) Str::uuid();
+            return $this->respondWithToken($token, $request);
+        } else {
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
-
-        $user = auth()->user();
-        $user->failed_login_attempts = 0;
-        $user->save();
-
-        return $this->respondWithToken($token, $request);
     }
 
     // Logout user
@@ -80,15 +76,15 @@ class AuthController extends Controller
             'email' => 'required|string|email',
         ]);
 
-        $status = Password::sendResetLink($request->only('email'));
+        $email = $request->input('email');
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json(['message' => 'Password reset link sent!'], 200);
-        } else {
-            return response()->json(['message' => 'Failed to send reset link'], 400);
-        }
+        DB::statement('CALL ResetPassword(?, @message)', [$email]);
+        $message = DB::select('SELECT @message AS message')[0]->message;
+
+        return response()->json(['message' => $message], 200);
     }
 
+    // Fetch user profile
     public function profile(Request $request)
     {
         $user = Auth::user();
