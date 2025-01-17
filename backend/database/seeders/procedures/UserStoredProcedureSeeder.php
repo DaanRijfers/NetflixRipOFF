@@ -14,7 +14,8 @@ class UserStoredProcedureSeeder extends Seeder
     {
         // Add new user
         DB::unprepared("
-            CREATE OR REPLACE PROCEDURE RemoveWatchlist(
+            DROP PROCEDURE IF EXISTS RemoveWatchlist;
+            CREATE PROCEDURE RemoveWatchlist(
                 IN profileId bigint(20),
                 IN mediaId bigint(20)
             )
@@ -26,7 +27,8 @@ class UserStoredProcedureSeeder extends Seeder
 
         // Remove user by ID
         DB::unprepared("
-            CREATE OR REPLACE PROCEDURE DeleteUser(
+            DROP PROCEDURE IF EXISTS DeleteUser;
+            CREATE PROCEDURE DeleteUser(
                 IN userId bigint(20)
             )
             BEGIN
@@ -37,7 +39,8 @@ class UserStoredProcedureSeeder extends Seeder
 
         // Increment failed_login_attempts by user ID
         DB::unprepared("
-            CREATE OR REPLACE PROCEDURE IncrementFailedLoginUser(
+            DROP PROCEDURE IF EXISTS IncrementFailedLoginUser;
+            CREATE PROCEDURE IncrementFailedLoginUser(
                 IN userId bigint(20)
             )
             BEGIN
@@ -49,7 +52,8 @@ class UserStoredProcedureSeeder extends Seeder
 
         // Updates property of user by column name
         DB::unprepared("
-            CREATE OR REPLACE PROCEDURE UpdateUserProperty(
+            DROP PROCEDURE IF EXISTS UpdateUserProperty;
+            CREATE PROCEDURE UpdateUserProperty(
                 IN userId bigint(20), 
                 IN columnName varchar(64), 
                 IN newValue TEXT
@@ -64,6 +68,7 @@ class UserStoredProcedureSeeder extends Seeder
 
         // Get all users
         DB::unprepared("
+            DROP PROCEDURE IF EXISTS GetAllUsers;
             CREATE PROCEDURE GetAllUsers()
             BEGIN
                 SELECT * FROM users;
@@ -72,6 +77,7 @@ class UserStoredProcedureSeeder extends Seeder
 
         // Get user by ID
         DB::unprepared("
+            DROP PROCEDURE IF EXISTS GetUserById;
             CREATE PROCEDURE GetUserById(
                 IN userId INT
             )
@@ -83,6 +89,7 @@ class UserStoredProcedureSeeder extends Seeder
 
         // Update user
         DB::unprepared("
+            DROP PROCEDURE IF EXISTS UpdateUser;
             CREATE PROCEDURE UpdateUser(
                 IN userId INT, 
                 IN userData JSON

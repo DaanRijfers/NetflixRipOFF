@@ -27,7 +27,7 @@ class ResetPasswordStoredProcedureSeeder extends Seeder
                 ELSE
                     -- Generate a new random password
                     SET new_password = SUBSTRING(MD5(RAND()), 1, 8);
-                    UPDATE users SET password = new_password, updated_at = NOW() WHERE email = p_email;
+                    UPDATE users SET password = new_password, updated_at = NOW() WHERE email COLLATE utf8mb4_unicode_ci = p_email COLLATE utf8mb4_unicode_ci;
                     SET p_message = CONCAT("Password reset successfully. New password: ", new_password);
                 END IF;
             END;

@@ -59,6 +59,9 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\procedures\SubscriptionStoredProcedureSeeder::class,
             \Database\Seeders\procedures\ProfileStoredProcedureSeeder::class,
             \Database\Seeders\procedures\ContentStoredProcedureSeeder::class,
+            \Database\Seeders\procedures\ResetPasswordStoredProcedureSeeder::class, // Added ResetPasswordStoredProcedureSeeder
+            \Database\Seeders\procedures\RegisterUserStoredProcedureSeeder::class, // Added RegisterUserStoredProcedureSeeder
+            \Database\Seeders\procedures\LoginUserStoredProcedureSeeder::class, // Added LoginUserStoredProcedureSeeder
         ]);
 
         $this->command->info('Stored procedures created successfully.');

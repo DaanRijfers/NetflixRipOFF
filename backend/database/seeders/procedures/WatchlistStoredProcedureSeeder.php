@@ -14,7 +14,8 @@ class WatchlistStoredProcedureSeeder extends Seeder
     {
         // Add item to watchlist
         DB::unprepared("
-            CREATE OR REPLACE PROCEDURE AddWatchlist(
+            DROP PROCEDURE IF EXISTS AddWatchlist;
+            CREATE PROCEDURE AddWatchlist(
                 IN profileId bigint(20), 
                 IN mediaId bigint(20)
             )
@@ -26,7 +27,8 @@ class WatchlistStoredProcedureSeeder extends Seeder
 
         // Remove item from watchlist
         DB::unprepared("
-            CREATE OR REPLACE PROCEDURE removeWatchlist(
+            DROP PROCEDURE IF EXISTS removeWatchlist;
+            CREATE PROCEDURE removeWatchlist(
                 IN profileId bigint(20), 
                 IN mediaId bigint(20)
             )

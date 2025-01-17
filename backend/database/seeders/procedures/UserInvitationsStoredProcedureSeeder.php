@@ -14,7 +14,8 @@ class UserInvitationsStoredProcedureSeeder extends Seeder
     {
         // Adds a new invitation
         DB::unprepared("
-            CREATE OR REPLACE PROCEDURE AddInvitation(
+            DROP PROCEDURE IF EXISTS AddInvitation;
+            CREATE PROCEDURE AddInvitation(
                 IN InviteUserId bigint(20),
                 IN InviteeUserId bigint(20)
             )
@@ -26,7 +27,8 @@ class UserInvitationsStoredProcedureSeeder extends Seeder
 
         // Marks invitation as completed
         DB::unprepared("
-            CREATE OR REPLACE PROCEDURE MarkInvitationAsCompleted(
+            DROP PROCEDURE IF EXISTS MarkInvitationAsCompleted;
+            CREATE PROCEDURE MarkInvitationAsCompleted(
                 IN InviteUserId bigint(20),
                 IN InviteeUserId bigint(20)
             )

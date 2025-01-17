@@ -18,7 +18,7 @@ class LoginUserStoredProcedureSeeder extends Seeder {
         BEGIN
             -- Check if the email exists and get the stored password
             SELECT id, password INTO p_user_id, p_hashed_password FROM users 
-            WHERE email COLLATE utf8mb4_unicode_ci = p_email COLLATE utf8mb4_unicode_ci;
+            WHERE email COLLATE utf8mb4_general_ci = p_email COLLATE utf8mb4_general_ci;
 
             IF p_user_id IS NULL THEN
                 SET p_message = "Invalid credentials";
