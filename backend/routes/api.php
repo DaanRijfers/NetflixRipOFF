@@ -20,7 +20,7 @@ Route::post('/auth/password-reset', [AuthController::class, 'resetPassword']); /
 Route::middleware(JwtMiddleware::class)->group(function () {
     Route::get('/user', [UserController::class, 'index']);
     Route::get('/user/{user_id}', [UserController::class, 'show']);
-    Route::put('/user/{user_id}', [UserController::class, 'update']);
+    Route::patch('/user/{user_id}', [UserController::class, 'update']);
     Route::delete('/user/{user_id}', [UserController::class, 'destroy']);
     Route::post('/user/{user_id}/subscription/{subscription_id}', [UserController::class, 'assignSubscription']);
     Route::patch('/user/{user_id}/subscription/{subscription_id}', [UserController::class, 'updateSubscription']);
