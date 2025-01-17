@@ -13,9 +13,6 @@ class JwtMiddleware
 {
     public function handle($request, Closure $next)
     {
-        \Log::info('Authorization Header: ' . $request->header('Authorization'));
-        \Log::info('Token expiration time: ' . date('Y-m-d H:i:s', JWTAuth::parseToken()->getPayload()->get('exp')));
-
         try {
             $user = JWTAuth::parseToken()->authenticate();
             if (!$user) {

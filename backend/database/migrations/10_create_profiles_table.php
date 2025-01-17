@@ -15,11 +15,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('name');
-            $table->string('favorite_animal')->nullable();
             $table->enum('media_preference', ['MOVIE', 'EPISODE']);
             $table->unsignedBigInteger('language_id');
             $table->date('date_of_birth')->nullable();
-            $table->binary('profile_picture')->nullable();
+            $table->longText('profile_picture')->charset('binary')->nullable();
             $table->timestamps();
         
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
