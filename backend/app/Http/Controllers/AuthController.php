@@ -75,21 +75,6 @@ class AuthController extends Controller
         return $this->respond(['message' => 'Logged out successfully!'], 200, $request);
     }
 
-    // Reset password
-    public function resetPassword(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|string|email',
-        ]);
-
-        $email = $request->input('email');
-
-        DB::statement('CALL ResetPassword(?, @message)', [$email]);
-        $message = DB::select('SELECT @message AS message')[0]->message;
-
-        return response()->json(['message' => $message], 200);
-    }
-
     // Fetch user profile
     public function profile(Request $request)
     {

@@ -23,10 +23,6 @@
           <input type="text" id="name" v-model="newProfile.name" required />
         </div>
         <div class="form-group">
-          <label for="favorite_animal">Favorite Animal:</label>
-          <input type="text" id="favorite_animal" v-model="newProfile.favorite_animal" required />
-        </div>
-        <div class="form-group">
           <label for="media_preference">Media Preference:</label>
           <select id="media_preference" v-model="newProfile.media_preference" required>
             <option value="MOVIE">Movie</option>
