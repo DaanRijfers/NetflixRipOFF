@@ -2,6 +2,8 @@
 
 set -ex  # Exit on any error
 
+chmod 644 /etc/mysql/conf.d/primary.cnf
+
 FILE_PATH="/docker-entrypoint-initdb.d/create-users.sql"
 
 echo "Waiting for the file to be generated: $FILE_PATH"

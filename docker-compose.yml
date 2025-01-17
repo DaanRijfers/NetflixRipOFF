@@ -15,6 +15,7 @@ services:
       - REPLICATION_PASSWORD=${REPLICATION_PASSWORD}
       - REPLICATION_DELAY=${REPLICATION_DELAY}
     entrypoint: /bin/sh -c "
+      rm -rfv /db-init/sql-files;
       apk update && apk add dos2unix gettext mariadb-client &&  
       echo 'Listing /db-init directory:'; ls -l /db-init && 
       if [ -f /db-init/generate-sql.sh ]; then 
@@ -69,7 +70,7 @@ services:
     volumes:
       - mariadb-replica:/var/lib/mysql:z
       - ./db-init/sql-files/replica/:/docker-entrypoint-initdb.d/:z
-      - ./mariadb/config/replica.cnf:/etc/mysql/conf.d/primary.cnf:z
+      - ./mariadb/config/replica.cnf:/etc/mysql/conf.d/replica.cnf:z
       - ./mariadb/entrypoint-replica.sh:/usr/local/bin/entrypoint.sh:z
     entrypoint: ["/bin/bash", "/usr/local/bin/entrypoint.sh"]
 
@@ -103,15 +104,15 @@ services:
       - /app/node_modules         # No :z needed since this is an internal container directory
     command: npm run serve
 
-  # phpmyadmin:
-  #   image: phpmyadmin/phpmyadmin:latest
-  #   container_name: phpmyadmin
-  #   environment:
-  #     PMA_HOST: mariadb
-  #   ports:
-  #     - "8081:80"
-  #   depends_on:
-  #     - mariadb
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mariadb
+    ports:
+      - "8081:80"
+    depends_on:
+      - mariadb
 
 volumes:
   mariadb-data:

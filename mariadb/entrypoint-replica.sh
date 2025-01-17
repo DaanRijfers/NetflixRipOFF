@@ -2,6 +2,8 @@
 
 set -ex  # Exit on any error
 
+chmod 644 /etc/mysql/conf.d/replica.cnf
+
 FILE_PATH="/docker-entrypoint-initdb.d/create-users.sql"
 
 apt update -y 
