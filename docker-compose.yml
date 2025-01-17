@@ -103,15 +103,15 @@ services:
       - /app/node_modules         # No :z needed since this is an internal container directory
     command: npm run serve
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    container_name: phpmyadmin
-    environment:
-      PMA_HOST: mariadb
-    ports:
-      - "8081:80"
-    depends_on:
-      - mariadb
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin:latest
+  #   container_name: phpmyadmin
+  #   environment:
+  #     PMA_HOST: mariadb
+  #   ports:
+  #     - "8081:80"
+  #   depends_on:
+  #     - mariadb
 
 volumes:
   mariadb-data:

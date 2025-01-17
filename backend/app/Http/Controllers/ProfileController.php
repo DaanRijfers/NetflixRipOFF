@@ -6,71 +6,54 @@ use App\Models\Profile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use App\Services\UnsplashService; 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class ProfileController extends Controller
 {
-    protected $unsplashService;
-
-    // Inject UnsplashService into the constructor
-    public function __construct(UnsplashService $unsplashService)
-    {
-        $this->unsplashService = $unsplashService;
-    }
-
     // Get all profiles
     public function index(Request $request)
     {
-        try {
-            $profiles = DB::select('CALL GetAllProfiles()');
-            return $this->respond(['message' => 'Profiles fetched successfully!', 'profiles' => $profiles], 200, $request);
-        } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
-        }
+        // Fetch profiles logic here
+        $profiles = []; // Replace with actual data fetching logic
+        return response()->json([
+            'message' => 'Profiles fetched successfully!',
+            'profiles' => $profiles,
+        ]);
     }
 
     // Create new profile
     public function store(Request $request)
     {
         try {
+            \Log::info($request->all());
             // Validate the request
             $validator = Validator::make($request->all(), [
                 'name' => 'required|max:255',
-                'favorite_animal' => 'required|string',
                 'media_preference' => 'required|in:MOVIE,EPISODE',
                 'language_id' => 'required|integer',
-                'profile_picture' => 'nullable|string', // Allow Unsplash image URL or base64
+                'profile_picture' => 'nullable|string',
             ]);
 
             if ($validator->fails()) {
-                return $this->respondWithError(422, $request, $validator->errors());
+                return $this->respondWithError(422, $request, $validator->errors()->toArray());
             }
 
-            // Handle profile picture (can be a URL or base64)
-            $profilePictureBinary = null;
-            if ($request->profile_picture) {
-                if (filter_var($request->profile_picture, FILTER_VALIDATE_URL)) {
-                    // If it's a URL, download the image
-                    $profilePictureBinary = file_get_contents($request->profile_picture);
-                } else {
-                    // If it's base64, decode it
-                    $profilePictureBinary = base64_decode($request->profile_picture);
-                }
-            }
+            // Handle profile picture (can be a URL, base64 or null)
+            $profilePictureBinary = $this->decodeProfilePicture($request);
 
-            DB::statement('CALL CreateProfile(?, ?, ?, ?, ?, ?)', [
-                $request->user()->id,
-                $request->name,
-                $request->favorite_animal,
-                $request->media_preference,
-                $request->language_id,
-                $profilePictureBinary
+            // Create the profile
+            $profile = Profile::create([
+                'user_id' => $request->user()->id,
+                'name' => $request->name,
+                'media_preference' => $request->media_preference,
+                'language_id' => $request->language_id,
+                'profile_picture' => $profilePictureBinary,
             ]);
-            $profile = DB::select('CALL GetProfileById(?)', [DB::getPdo()->lastInsertId()]);
+
+            $profile['profile_picture'] = url("/api/profile/" . $profile->id . "/picture");
             return $this->respond(['message' => 'Profile created successfully!', 'profile' => $profile], 201, $request);
         } catch (\Exception $e) {
+            die($e);
             return $this->respondWithError(500, $request, $e->getMessage());
         }
     }
@@ -79,7 +62,8 @@ class ProfileController extends Controller
     public function show(Request $request, $profile_id)
     {
         try {
-            $profile = DB::select('CALL GetProfileById(?)', [$profile_id]);
+            $profile = Profile::findOrFail($profile_id);
+            $profile['profile_picture'] = url("/api/profile/" . $profile->id . "/picture");
             return $this->respond(['message' => 'Profile fetched successfully!', 'profile' => $profile], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(404, $request);
@@ -94,7 +78,6 @@ class ProfileController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'name' => 'sometimes|max:255',
-                'favorite_animal' => 'sometimes|string',
                 'media_preference' => 'sometimes|in:MOVIE,EPISODE',
                 'language_id' => 'sometimes|exists:languages,id',
                 'profile_picture' => 'nullable|string', // Allow Unsplash image URL or base64
@@ -105,19 +88,17 @@ class ProfileController extends Controller
             }
 
             // Handle profile picture (can be a URL or base64)
-            $profilePictureBinary = null;
-            if ($request->profile_picture) {
-                if (filter_var($request->profile_picture, FILTER_VALIDATE_URL)) {
-                    // If it's a URL, download the image
-                    $profilePictureBinary = file_get_contents($request->profile_picture);
-                } else {
-                    // If it's base64, decode it
-                    $profilePictureBinary = base64_decode($request->profile_picture);
-                }
-            }
+            $profilePictureBinary = $this->decodeProfilePicture($request);
 
-            DB::statement('CALL UpdateProfile(?, ?)', [$profile_id, json_encode(array_merge($request->all(), ['profile_picture' => $profilePictureBinary]))]);
-            $profile = DB::select('CALL GetProfileById(?)', [$profile_id]);
+            // Update the profile
+            $profile->fill([
+                'name' => $request->name,
+                'media_preference' => $request->media_preference,
+                'language_id' => $request->language_id,
+                'profile_picture' => $profilePictureBinary,
+            ])->save();
+
+            $profile['profile_picture'] = url("/api/profile/" . $profile->id . "/picture");
             return $this->respond(['message' => 'Profile updated successfully!', 'profile' => $profile], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request, $e->getMessage());
@@ -128,7 +109,8 @@ class ProfileController extends Controller
     public function destroy(Request $request, $profile_id)
     {
         try {
-            DB::statement('CALL DeleteProfile(?)', [$profile_id]);
+            $profile = Profile::findOrFail($profile_id);
+            $profile->delete();
             return $this->respond(['message' => 'Profile deleted successfully!'], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
@@ -150,7 +132,7 @@ class ProfileController extends Controller
                 $profile = Profile::create([
                     'user_id' => $user->id,
                     'name' => 'Default Profile', // Default name
-                    'profile_picture' => null, // No profile picture by default
+                    'profile_picture' => $this->decodeProfilePicture($request), // No profile picture by default
                     'date_of_birth' => now()->subYears(20)->toDateString(), // Default date of birth
                     'language_id' => 1, // Default language ID
                 ]);
@@ -170,39 +152,17 @@ class ProfileController extends Controller
         }
     }
 
-
-    // Create a new profile for the authenticated user
-    public function createProfile(Request $request)
+    // Get the favorite content of the currently authenticated user
+    public function getFavoriteContent(Request $request)
     {
         try {
-            // Validate the request
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'profile_picture' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048', // Allow image uploads
-                'date_of_birth' => 'required|date',
-                'language_id' => 'nullable|integer',
-            ]);
+            // Get the authenticated user
+            $user = $request->user();
 
-            if ($validator->fails()) {
-                return $this->respondWithError(422, $request, $validator->errors());
-            }
+            // Fetch the favorite content associated with the user
+            $favoriteContent = $user->favoriteContent;
 
-            // Handle profile picture upload
-            $profilePictureBinary = null;
-            if ($request->hasFile('profile_picture')) {
-                $profilePictureBinary = file_get_contents($request->file('profile_picture')->getRealPath());
-            }
-
-            // Create the profile
-            $profile = Profile::create([
-                'user_id' => $request->user()->id,
-                'name' => $request->name,
-                'profile_picture' => $profilePictureBinary,
-                'date_of_birth' => $request->date_of_birth,
-                'language_id' => $request->language_id,
-            ]);
-
-            return $this->respond(['message' => 'Profile created successfully!', 'profile' => $profile], 201, $request);
+            return $this->respond(['message' => 'Favorite content fetched successfully!', 'favoriteContent' => $favoriteContent], 200, $request);
         } catch (\Exception $e) {
             return $this->respondWithError(500, $request);
         }
@@ -270,53 +230,51 @@ class ProfileController extends Controller
             return $this->respondWithError(500, $request);
         }
     }
-
-    /**
-     * Fetch profile picture suggestions from Unsplash.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getProfilePictureSuggestions(Request $request)
+    
+    public function getProfilePicture(Request $request, $profile_id)
     {
         try {
-            // Validate the request
-            $validator = Validator::make($request->all(), [
-                'query' => 'required|string|max:255', // Search term for Unsplash
-            ]);
-
-            if ($validator->fails()) {
-                return $this->respondWithError(422, $request, $validator->errors());
+            $profile = Profile::findOrFail($profile_id);
+    
+            $profilePictureBinary = $profile->profile_picture;
+    
+            if (!$profilePictureBinary) {
+                return response()->json(['error' => 'Profile picture not found'], 404);
             }
-
-            // Fetch images from Unsplash
-            $query = $request->input('query');
-            $photos = $this->unsplashService->searchPhotos($query, 5); // Fetch 5 photos
-
-            // Return the results
-            return $this->respond([
-                'message' => 'Profile picture suggestions fetched successfully!',
-                'photos' => $photos['results'],
-            ], 200, $request);
-        } catch (\Exception $e) {
-            return $this->respondWithError(500, $request, $e->getMessage());
+    
+            // Initialize FileInfo and get MIME type
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->buffer($profilePictureBinary);
+    
+            return response($profilePictureBinary, 200)
+                ->header('Content-Type', $mimeType);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Server error', 'message' => $th->getMessage()], 500);
         }
     }
+    
 
-    public function getCurrentUserProfile()
+    // Fetch the PFP, decode it or get a random fox one
+    private function decodeProfilePicture($request)
     {
-        $userId = Auth::id();
-        $profiles = DB::select('CALL GetAllProfiles()');
-        $userProfiles = array_filter($profiles, function($profile) use ($userId) {
-            return $profile->user_id == $userId;
-        });
-        return response()->json(['profiles' => $userProfiles]);
-    }
+        $profilePictureBinary = null;
+        try {
+            if (!$request->profile_picture) {
+                $imageResponse = Http::get('https://randomfox.ca/floof/');
+                if($imageResponse->successful()) {
+                    $profilePictureBinary = file_get_contents($imageResponse->json()['image']);
+                } else {
+                    $profilePictureBinary = base64_decode("UklGRg4DAABXRUJQVlA4WAoAAAAQAAAAJwAAJwAAQUxQSA0BAAABgGptexopyyyZGe2evYBVvJKZFN0DO163mpmZNTMzyZlZLv2J6WT+Rq2MiAkgtnsFR/kHZHZdMKv1BNW+eOb5689iYbxjKHn7DNHkh5DMcBsQ2pHeQ2wbRGK9xMPJhiWsv/PH80W+eSxdvh1Rwn9FSWVGWrhaDfnlWjWAKgrXNpqmKBrwpDwgaZKkAXB4DzJU+P740yhYCXIk2Y8MU/o0/2oUdGNyygc/Zssps53+mL9kSsHqD0PWZEkCCrwMV5UVDSjwY4CiqICocwlWQJVlRQNUHWDsZHp2V5ZkFdB1GFt0IaSagZF6P1GEkBoR+oggWpIobUSQTQdBbvyIGNMhRAipx56IkUg4DSL/FgBWUDgg2gEAAPAIAJ0BKigAKAA+kUSZSqWjoiGnOApIsBIJYgDBsXVgvkcgJ17GhPQOvgidky8fiw+9VINh196O6cTVVzAMb+cWzyAWIrAAL+QcFGfDFQAAAP7/Gt3jwoEvSITLJ0xDHYvMNGzQ7nWrE7dQcTwMdJkoEw1dKk/YaiQ/f5qPDw3ymTApdmVRLHbdhqzfs+Xq3WCDHcIaKNJGG9QO4YVG/zcvZE0Hhsa4HTR9CwN8N7yP1uilT2c0Kn6PBVna3Jvm/SRzVOreOmNftymuBBqMo43xd7/A+D3Zcujc2czkC8gDd3mpm6ht9bn3KLVLM9V8lTNNJoASlcS201l1Cl6vw1d3muRjRfQdHAev8rry1jNzhFtBQkRO+8orsTPDCLE+esqhrkIwqAHf/a3oy1SHqH8bi8pA9TVmYVX0JqCMd51uZrJAgRU0dh55FGpy7XX37/mjxZlwBQzxnEdyjr7zHEI+pe7sFnFGaJvn/jQwN3QH5f+LC//Q0BeJEADeTkP3aLj3UKO5jK/6hwwdCK7qhuRXe7I37QPAKsH+eLH3s/qHBeHkuDH3muiDjqHKwcLLvwf9EitdGA7niLdLaxp47II/nXJmEE7ADX5ArTz+5XR1CR2oLvgXOQAAAA==");
+                }
+            } elseif (filter_var($request->profile_picture, FILTER_VALIDATE_URL)) {
+                $profilePictureBinary = file_get_contents($request->profile_picture);
+            } else {
+                $profilePictureBinary = base64_decode($request->profile_picture);
+            }
+        } catch (\Exception $e) {
+            return base64_decode("UklGRg4DAABXRUJQVlA4WAoAAAAQAAAAJwAAJwAAQUxQSA0BAAABgGptexopyyyZGe2evYBVvJKZFN0DO163mpmZNTMzyZlZLv2J6WT+Rq2MiAkgtnsFR/kHZHZdMKv1BNW+eOb5689iYbxjKHn7DNHkh5DMcBsQ2pHeQ2wbRGK9xMPJhiWsv/PH80W+eSxdvh1Rwn9FSWVGWrhaDfnlWjWAKgrXNpqmKBrwpDwgaZKkAXB4DzJU+P740yhYCXIk2Y8MU/o0/2oUdGNyygc/Zssps53+mL9kSsHqD0PWZEkCCrwMV5UVDSjwY4CiqICocwlWQJVlRQNUHWDsZHp2V5ZkFdB1GFt0IaSagZF6P1GEkBoR+oggWpIobUSQTQdBbvyIGNMhRAipx56IkUg4DSL/FgBWUDgg2gEAAPAIAJ0BKigAKAA+kUSZSqWjoiGnOApIsBIJYgDBsXVgvkcgJ17GhPQOvgidky8fiw+9VINh196O6cTVVzAMb+cWzyAWIrAAL+QcFGfDFQAAAP7/Gt3jwoEvSITLJ0xDHYvMNGzQ7nWrE7dQcTwMdJkoEw1dKk/YaiQ/f5qPDw3ymTApdmVRLHbdhqzfs+Xq3WCDHcIaKNJGG9QO4YVG/zcvZE0Hhsa4HTR9CwN8N7yP1uilT2c0Kn6PBVna3Jvm/SRzVOreOmNftymuBBqMo43xd7/A+D3Zcujc2czkC8gDd3mpm6ht9bn3KLVLM9V8lTNNJoASlcS201l1Cl6vw1d3muRjRfQdHAev8rry1jNzhFtBQkRO+8orsTPDCLE+esqhrkIwqAHf/a3oy1SHqH8bi8pA9TVmYVX0JqCMd51uZrJAgRU0dh55FGpy7XX37/mjxZlwBQzxnEdyjr7zHEI+pe7sFnFGaJvn/jQwN3QH5f+LC//Q0BeJEADeTkP3aLj3UKO5jK/6hwwdCK7qhuRXe7I37QPAKsH+eLH3s/qHBeHkuDH3muiDjqHKwcLLvwf9EitdGA7niLdLaxp47II/nXJmEE7ADX5ArTz+5XR1CR2oLvgXOQAAAA==");
+        }
 
-    public function getFavoriteContent()
-    {
-        $userId = Auth::id();
-        $favoriteContent = DB::select('CALL GetFavoriteContentByUserId(?)', [$userId]);
-        return response()->json(['favoriteContent' => $favoriteContent]);
+        return $profilePictureBinary;
     }
 }

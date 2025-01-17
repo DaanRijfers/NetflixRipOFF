@@ -31,8 +31,6 @@ This repository contains the setup for running MariaDB and phpMyAdmin in Docker 
 
    This will start the MariaDB and phpMyAdmin containers in the background.
 
-5. Access phpMyAdmin via your browser at http://localhost:8080.
-
 ## Stopping the Containers
 
 If you want to stop the containers, run:
