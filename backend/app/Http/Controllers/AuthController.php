@@ -45,21 +45,27 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $email = $request->input('email');
-        $password = $request->input('password');
+        $credentials = $request->only('email', 'password');
 
-        DB::statement('CALL LoginUser(?, @user_id, @hashed_password, @message)', [$email]);
-        $message = DB::select('SELECT @message AS message')[0]->message;
-        $user_id = DB::select('SELECT @user_id AS user_id')[0]->user_id;
-        $hashed_password = DB::select('SELECT @hashed_password AS hashed_password')[0]->hashed_password;
+        if (!$token = auth('api')->attempt($credentials)) {
+            $user = User::where('email', $request->email)->first();
 
-        if ($message === 'User found' && Hash::check($password, $hashed_password)) {
-            // Generate a token (for simplicity, using a UUID here)
-            $token = (string) Str::uuid();
-            return $this->respondWithToken($token, $request);
-        } else {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            if ($user) {
+                $user->increment('failed_login_attempts');
+                if ($user->failed_login_attempts >= 3) {
+                    return $this->respond(['message' => 'Account locked. Please reset your password.'], 423, $request);
+                }
+                $user->save();
+            }
+
+            return $this->respond(['message' => 'Invalid credentials'], 401, $request);
         }
+
+        $user = auth('api')->user();
+        $user->failed_login_attempts = 0;
+        $user->save();
+
+        return $this->respondWithToken($token, $request);
     }
 
     // Logout user
@@ -102,8 +108,8 @@ class AuthController extends Controller
             'user' => [
                 'access_token' => $token,
                 'token_type' => 'bearer',
-                'expires_in' => auth()->factory()->getTTL() * 60,
-                'user' => auth()->user(),
+                'expires_in' => auth('api')->factory()->getTTL() * 60,
+                'user' => auth('api')->user(),
             ],
         ], 200, $request);
     }
