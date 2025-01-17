@@ -91,14 +91,13 @@ class UserStoredProcedureSeeder extends Seeder
         DB::unprepared("
             DROP PROCEDURE IF EXISTS UpdateUser;
             CREATE PROCEDURE UpdateUser(
-                IN userId INT, 
-                IN userData JSON
+            IN userId INT, 
+            IN userData JSON
             )
             BEGIN
-                UPDATE users 
-                SET name = JSON_UNQUOTE(JSON_EXTRACT(userData, '$.name')), 
-                    email = JSON_UNQUOTE(JSON_EXTRACT(userData, '$.email')) 
-                WHERE id = userId;
+            UPDATE users 
+            SET email = JSON_UNQUOTE(JSON_EXTRACT(userData, '$.email')) 
+            WHERE id = userId;
             END;
         ");
     }
