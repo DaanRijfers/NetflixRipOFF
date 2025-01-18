@@ -49,9 +49,6 @@ Route::middleware('auth:api')->get('/auth/profile', [AuthController::class, 'pro
 Route::middleware(JwtMiddleware::class)->group(function () {
     // Get the profile of the currently authenticated user
     Route::get('/user/profile', [ProfileController::class, 'getCurrentUserProfile']);
-    
-    // Get the favorite content of the currently authenticated user
-    Route::get('/user/favorite-content', [ProfileController::class, 'getFavoriteContent']);
 });
 
 // Content Routes

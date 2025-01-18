@@ -14,6 +14,18 @@ class UserStoredProcedureSeeder extends Seeder
     {
         // Add new user
         DB::unprepared("
+            DROP PROCEDURE IF EXISTS AddUser;
+            CREATE PROCEDURE AddUser(
+                IN userEmail VARCHAR(255),
+                IN userPassword VARCHAR(255)
+            )
+            BEGIN
+                INSERT INTO users (email, password) VALUES (userEmail, userPassword);
+            END;
+        ");
+
+        // Remove watchlist item
+        DB::unprepared("
             DROP PROCEDURE IF EXISTS RemoveWatchlist;
             CREATE PROCEDURE RemoveWatchlist(
                 IN profileId bigint(20),
@@ -21,7 +33,7 @@ class UserStoredProcedureSeeder extends Seeder
             )
             BEGIN
                 DELETE FROM watchlist
-                WHERE profile_id = profileId AND media_id = mediaId;
+                WHERE id = profileId AND media_id = mediaId;
             END;
         ");
 
@@ -102,3 +114,4 @@ class UserStoredProcedureSeeder extends Seeder
         ");
     }
 }
+

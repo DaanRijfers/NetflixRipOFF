@@ -51,7 +51,12 @@ export default {
           this.errorMessage = 'User does not exist. Please check your email and try again.';
         } else {
           this.successMessage = 'Login successful!';
-          localStorage.setItem('token', response.data.token); // Store token in localStorage
+          const token = response.data.user.access_token; // Get the access token
+          const userId = response.data.user.user.id; // Get the user ID
+          localStorage.setItem('token', token); // Store token in localStorage
+          localStorage.setItem('email', this.email); // Store email in localStorage
+          localStorage.setItem('userId', userId); // Store user ID in localStorage
+          console.log('Token:', token); // Show token in the console
 
           // Emit an event to notify App.vue that the user is logged in
           this.$emit('login-success');

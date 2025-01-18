@@ -10,13 +10,13 @@
         <table class="min-w-full bg-gray-800 border border-gray-700">
           <thead>
             <tr>
-              <th class="px-4 py-2 border border-gray-700">Name</th>
+              <th class="px-4 py-2 border border-gray-700">Id</th>
               <th class="px-4 py-2 border border-gray-700">Email</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="user in users" :key="user.id" class="hover:bg-gray-700">
-              <td class="px-4 py-2 border border-gray-700">{{ user.name }}</td>
+              <td class="px-4 py-2 border border-gray-700">{{ user.id }}</td>
               <td class="px-4 py-2 border border-gray-700">{{ user.email }}</td>
             </tr>
           </tbody>
@@ -83,28 +83,6 @@
         </table>
       </div>
     </div>
-
-    <!-- Favorite Content Section -->
-    <div class="w-full max-w-5xl mt-6">
-      <h2 class="text-xl font-bold mb-4">Favorite Content</h2>
-      <div v-if="loadingFavoriteContent" class="text-white">Loading favorite content...</div>
-      <div v-else class="overflow-x-auto">
-        <table class="min-w-full bg-gray-800 border border-gray-700">
-          <thead>
-            <tr>
-              <th class="px-4 py-2 border border-gray-700">User</th>
-              <th class="px-4 py-2 border border-gray-700">Content Title</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in favoriteContent" :key="item.id" class="hover:bg-gray-700">
-              <td class="px-4 py-2 border border-gray-700">{{ item.userName }}</td>
-              <td class="px-4 py-2 border border-gray-700">{{ item.title }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -127,14 +105,16 @@ const loadingContent = ref(true);
 const subscriptions = ref([]);
 const loadingSubscriptions = ref(true);
 
-// State for favorite content
-const favoriteContent = ref([]);
-const loadingFavoriteContent = ref(true);
+const token = localStorage.getItem('token'); // Store token in localStorage
 
 // Fetch data on component mount
 const fetchUsers = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/user');
+    const response = await fetch(`http://localhost:8000/api/user`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -149,7 +129,11 @@ const fetchUsers = async () => {
 
 const fetchProfiles = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/profile');
+    const response = await fetch('http://localhost:8000/api/auth/profile', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -164,7 +148,11 @@ const fetchProfiles = async () => {
 
 const fetchContent = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/contents');
+    const response = await fetch('http://localhost:8000/api/content', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -179,7 +167,11 @@ const fetchContent = async () => {
 
 const fetchSubscriptions = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/subscriptions');
+    const response = await fetch('http://localhost:8000/api/subscription', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -191,6 +183,7 @@ const fetchSubscriptions = async () => {
     loadingSubscriptions.value = false;
   }
 };
+
 onMounted(() => {
   fetchUsers();
   fetchProfiles();

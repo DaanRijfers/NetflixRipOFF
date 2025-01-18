@@ -10,6 +10,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'UserLogoutComponent', // Rename the component to follow the multi-word naming convention
   data() {
@@ -24,11 +26,22 @@ export default {
     cancelLogout() {
       this.showConfirm = false;
     },
-    logout() {
-      // Implement your logout logic here
-      console.log('User logged out');
-      localStorage.clear();
-      this.$router.push('/login');
+    async logout() {
+      try {
+        const email = localStorage.getItem('email');
+        const token = localStorage.getItem('token');
+        await axios.post('http://localhost:8000/api/auth/logout', {}, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Email': email
+          }
+        });
+        console.log('User logged out');
+        localStorage.clear();
+        this.$router.push('/login');
+      } catch (error) {
+        console.error('Failed to logout:', error);
+      }
     }
   }
 }

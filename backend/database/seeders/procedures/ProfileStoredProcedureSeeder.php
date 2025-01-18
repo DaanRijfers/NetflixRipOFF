@@ -45,6 +45,12 @@ class ProfileStoredProcedureSeeder extends Seeder
             BEGIN
                 SELECT * FROM favorite_content WHERE user_id = userId;
             END;
+
+            DROP PROCEDURE IF EXISTS GetProfilesByUserId;
+            CREATE PROCEDURE GetProfilesByUserId(IN userId INT)
+            BEGIN
+                SELECT * FROM profiles WHERE user_id = userId;
+            END;
         ');
     }
 }

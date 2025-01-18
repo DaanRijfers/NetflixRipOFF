@@ -8,7 +8,6 @@
           <p>Favorite Animal: {{ profile.favorite_animal }}</p>
           <p>Media Preference: {{ profile.media_preference === 'EPISODE' ? 'Series' : 'Movie' }}</p>
           <p>Language: {{ getLanguageName(profile.language_id) }}</p>
-          <img v-if="profile.profile_picture" :src="getProfilePictureUrl(profile.profile_picture)" alt="Profile Picture" class="profile-picture" />
           <button @click="selectProfile(profile)">Select Profile</button>
         </div>
       </div>
@@ -21,10 +20,6 @@
         <div class="form-group">
           <label for="name">Name:</label>
           <input type="text" id="name" v-model="newProfile.name" required />
-        </div>
-        <div class="form-group">
-          <label for="favorite_animal">Favorite Animal:</label>
-          <input type="text" id="favorite_animal" v-model="newProfile.favorite_animal" required />
         </div>
         <div class="form-group">
           <label for="media_preference">Media Preference:</label>
@@ -70,13 +65,6 @@
         </form>
       </div>
 
-      <div v-if="favoriteContent.length > 0">
-        <h2>Favorite Content</h2>
-        <ul>
-          <li v-for="content in favoriteContent" :key="content.id">{{ content.title }}</li>
-        </ul>
-      </div>
-
       <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
       <div v-if="successMessage" class="success">{{ successMessage }}</div>
     </div>
@@ -94,7 +82,6 @@ export default {
       selectedProfile: null,
       newProfile: {
         name: '',
-        favorite_animal: '',
         media_preference: 'MOVIE',
         language_id: 1,
       },
@@ -102,14 +89,17 @@ export default {
       errorMessage: '',
       successMessage: '',
       isLoggedIn: false,
-      favoriteContent: [],
     };
   },
   async created() {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Token not provided');
+      }
       const profileResponse = await axios.get('http://localhost:8000/api/profile', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
       this.isLoggedIn = true;
@@ -118,44 +108,23 @@ export default {
         throw new Error('No profiles data returned from server');
       }
 
-      const languageResponse = await axios.get('http://localhost:8000/api/languages');
-      this.languages = languageResponse.data.languages;
+      const languageResponse = await axios.get('http://localhost:8000/api/languages', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      this.languages = languageResponse.data.languages || languageResponse.data;
     } catch (error) {
       console.error('Error fetching data:', error.response ? error.response.data : error.message);
       this.errorMessage = `Failed to load data: ${error.response ? error.response.data.message : error.message}`;
     }
-    this.fetchFavoriteContent();
   },
   methods: {
-    async fetchAnimalImage(animal) {
-      try {
-        const response = await axios.get(`https://api.unsplash.com/search/photos?query=${animal}&client_id=`);
-        if (response.data.results.length > 0) {
-          return response.data.results[0].urls.small;
-        }
-      } catch (error) {
-        console.error('Error fetching animal image:', error);
-      }
-      return null;
-    },
-    async urlToBinary(url) {
-      try {
-        const response = await axios.get(url, { responseType: 'arraybuffer' });
-        return Buffer.from(response.data, 'binary').toString('base64');
-      } catch (error) {
-        console.error('Error converting image to binary:', error);
-        return null;
-      }
+    selectProfile(profile) {
+      this.selectedProfile = profile;
     },
     async createProfile() {
       try {
-        const imageUrl = await this.fetchAnimalImage(this.newProfile.favorite_animal);
-        let profilePictureBinary = null;
-
-        if (imageUrl) {
-          profilePictureBinary = await this.urlToBinary(imageUrl);
-        }
-
         const response = await axios.post(
           'http://localhost:8000/api/profile',
           {
@@ -163,8 +132,7 @@ export default {
             favorite_animal: this.newProfile.favorite_animal,
             media_preference: this.newProfile.media_preference,
             language_id: this.newProfile.language_id,
-            profile_picture: profilePictureBinary || '', 
-          }, 
+          },
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -186,23 +154,17 @@ export default {
         this.successMessage = '';
       }
     },
-    selectProfile(profile) {
-      this.selectedProfile = { ...profile };
-    },
     async updateProfile() {
+      const id = localStorage.getItem('userId');
+
       try {
-        const imageUrl = await this.fetchAnimalImage(this.selectedProfile.favorite_animal);
-        let profilePictureBinary = null;
-
-        if (imageUrl) {
-          profilePictureBinary = await this.urlToBinary(imageUrl);
-        }
-
         const response = await axios.put(
-          `http://localhost:8000/api/profile/${this.selectedProfile.id}`,
+          `http://localhost:8000/api/profile/${id}`,
           {
-            ...this.selectedProfile,
-            profile_picture: profilePictureBinary, 
+            name: this.selectedProfile.name,
+            favorite_animal: this.selectedProfile.favorite_animal,
+            media_preference: this.selectedProfile.media_preference,
+            language_id: this.selectedProfile.language_id,
           },
           {
             headers: {
@@ -219,24 +181,9 @@ export default {
         this.successMessage = '';
       }
     },
-    async fetchFavoriteContent() {
-      try {
-        const response = await axios.get('http://localhost:8000/api/user/favorite-content', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
-        this.favoriteContent = response.data.favoriteContent;
-      } catch (error) {
-        console.error('Error fetching favorite content:', error.response ? error.response.data : error.message);
-      }
-    },
     getLanguageName(languageId) {
       const language = this.languages.find(lang => lang.id === languageId);
       return language ? language.name : 'Unknown';
-    },
-    getProfilePictureUrl(profilePicture) {
-      return `data:image/jpeg;base64,${profilePicture}`;
     },
   },
 };
@@ -344,11 +291,5 @@ export default {
 
 .selected-profile {
   margin-top: 20px;
-}
-
-.profile-picture {
-  max-width: 100px;
-  border-radius: 4px;
-  margin-top: 10px;
 }
 </style>
