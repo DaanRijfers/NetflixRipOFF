@@ -34,7 +34,7 @@ class AuthController extends Controller
         DB::statement('CALL RegisterUser(?, ?, @message)', [$email, $password]);
         $message = DB::select('SELECT @message AS message')[0]->message;
 
-        return response()->json(['message' => $message], 200);
+        return $this->respond(['message' => $message], 200, $request);
     }
 
     // Login user
@@ -75,16 +75,6 @@ class AuthController extends Controller
         return $this->respond(['message' => 'Logged out successfully!'], 200, $request);
     }
 
-    // Fetch user profile
-    public function profile(Request $request)
-    {
-        $user = Auth::user();
-        return response()->json([
-            'message' => 'Profile fetched successfully!',
-            'user' => $user,
-        ]);
-    }
-
     // Helper function for generating JWT token
     protected function respondWithToken($token, $request)
     {
@@ -97,11 +87,5 @@ class AuthController extends Controller
                 'user' => auth('api')->user(),
             ],
         ], 200, $request);
-    }
-
-    // General response helper
-    protected function respond($data, $status = 200, $request = null)
-    {
-        return response()->json($data, $status);
     }
 }

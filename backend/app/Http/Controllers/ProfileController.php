@@ -15,17 +15,13 @@ class ProfileController extends Controller
     {
         // Fetch profiles logic here
         $profiles = []; // Replace with actual data fetching logic
-        return response()->json([
-            'message' => 'Profiles fetched successfully!',
-            'profiles' => $profiles,
-        ]);
+        return $this->respond(['message' => 'Profiles fetched successfully!', 'profiles' => $profiles], 200, $request);
     }
 
     // Create new profile
     public function store(Request $request)
     {
         try {
-            \Log::info($request->all());
             // Validate the request
             $validator = Validator::make($request->all(), [
                 'name' => 'required|max:255',
@@ -139,12 +135,8 @@ class ProfileController extends Controller
                 $profiles->push($profile);
             }
 
-            return response()->json([
-                'message' => 'Profiles fetched successfully!',
-                'profiles' => $profiles,
-            ], 200);
+            return $this->respond(['message' => 'Profiles fetched successfully!', 'profiles' => $profiles], 200, $request);
         } catch (\Exception $e) {
-            \Log::error('Error fetching profiles: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Internal Server Error',
                 'error' => $e->getMessage(),
@@ -249,7 +241,7 @@ class ProfileController extends Controller
             return response($profilePictureBinary, 200)
                 ->header('Content-Type', $mimeType);
         } catch (\Throwable $th) {
-            return response()->json(['error' => 'Server error', 'message' => $th->getMessage()], 500);
+            return $this->respond(['error' => 'Server error', 'message' => $th->getMessage()], 500, $request);
         }
     }
     
