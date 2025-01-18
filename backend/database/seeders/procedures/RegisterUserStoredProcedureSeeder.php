@@ -10,6 +10,7 @@ class RegisterUserStoredProcedureSeeder extends Seeder
     public function run()
     {
         DB::unprepared('
+            DROP PROCEDURE IF EXISTS RegisterUser;
             CREATE PROCEDURE RegisterUser(
                 IN p_email VARCHAR(255),
                 IN p_password VARCHAR(255),
