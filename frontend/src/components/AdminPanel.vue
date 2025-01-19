@@ -129,7 +129,7 @@ const fetchUsers = async () => {
 
 const fetchProfiles = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/auth/profile', {
+    const response = await fetch('http://localhost:8000/api/profile', {
       headers: {
         'Authorization': `Bearer ${token}`
       }

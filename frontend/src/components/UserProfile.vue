@@ -3,9 +3,8 @@
     <div v-if="isLoggedIn">
       <h2>Profiles</h2>
       <div v-if="profiles.length > 0">
-        <div v-for="profile in profiles" :key="profile.id" class="profile-card">
+        <div v-for="profile in filteredProfiles" :key="profile.id" class="profile-card">
           <h3>{{ profile.name }}</h3>
-          <p>Favorite Animal: {{ profile.favorite_animal }}</p>
           <p>Media Preference: {{ profile.media_preference === 'EPISODE' ? 'Series' : 'Movie' }}</p>
           <p>Language: {{ getLanguageName(profile.language_id) }}</p>
           <button @click="selectProfile(profile)">Select Profile</button>
@@ -119,6 +118,11 @@ export default {
       this.errorMessage = `Failed to load data: ${error.response ? error.response.data.message : error.message}`;
     }
   },
+  computed: {
+    filteredProfiles() {
+      return this.profiles.filter(profile => profile);
+    },
+  },
   methods: {
     selectProfile(profile) {
       this.selectedProfile = profile;
@@ -129,7 +133,6 @@ export default {
           'http://localhost:8000/api/profile',
           {
             name: this.newProfile.name,
-            favorite_animal: this.newProfile.favorite_animal,
             media_preference: this.newProfile.media_preference,
             language_id: this.newProfile.language_id,
           },
@@ -145,7 +148,6 @@ export default {
         this.errorMessage = '';
         this.newProfile = {
           name: '',
-          favorite_animal: '',
           media_preference: 'MOVIE',
           language_id: 1,
         };
@@ -162,7 +164,6 @@ export default {
           `http://localhost:8000/api/profile/${id}`,
           {
             name: this.selectedProfile.name,
-            favorite_animal: this.selectedProfile.favorite_animal,
             media_preference: this.selectedProfile.media_preference,
             language_id: this.selectedProfile.language_id,
           },

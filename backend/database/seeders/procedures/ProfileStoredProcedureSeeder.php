@@ -23,15 +23,15 @@ class ProfileStoredProcedureSeeder extends Seeder
             END;
 
             DROP PROCEDURE IF EXISTS CreateProfile;
-            CREATE PROCEDURE CreateProfile(IN userId INT, IN name VARCHAR(255), IN favoriteAnimal VARCHAR(255), IN mediaPreference VARCHAR(255), IN languageId INT, IN profilePicture LONGBLOB)
+            CREATE PROCEDURE CreateProfile(IN userId INT, IN name VARCHAR(255), IN mediaPreference VARCHAR(255), IN languageId INT)
             BEGIN
-                INSERT INTO profiles (user_id, name, favorite_animal, media_preference, language_id, profile_picture) VALUES (userId, name, favoriteAnimal, mediaPreference, languageId, profilePicture);
+                INSERT INTO profiles (user_id, name, media_preference, language_id) VALUES (userId, name, mediaPreference, languageId);
             END;
 
             DROP PROCEDURE IF EXISTS UpdateProfile;
             CREATE PROCEDURE UpdateProfile(IN profileId INT, IN profileData JSON)
             BEGIN
-                UPDATE profiles SET name = JSON_UNQUOTE(JSON_EXTRACT(profileData, "$.name")), favorite_animal = JSON_UNQUOTE(JSON_EXTRACT(profileData, "$.favorite_animal")), media_preference = JSON_UNQUOTE(JSON_EXTRACT(profileData, "$.media_preference")), language_id = JSON_UNQUOTE(JSON_EXTRACT(profileData, "$.language_id")), profile_picture = JSON_UNQUOTE(JSON_EXTRACT(profileData, "$.profile_picture")) WHERE id = profileId;
+                UPDATE profiles SET name = JSON_UNQUOTE(JSON_EXTRACT(profileData, "$.name")), media_preference = JSON_UNQUOTE(JSON_EXTRACT(profileData, "$.media_preference")), language_id = JSON_UNQUOTE(JSON_EXTRACT(profileData, "$.language_id")) WHERE id = profileId;
             END;
 
             DROP PROCEDURE IF EXISTS DeleteProfile;
