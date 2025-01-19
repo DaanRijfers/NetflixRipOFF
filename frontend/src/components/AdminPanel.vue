@@ -53,11 +53,23 @@
           <thead>
             <tr>
               <th class="px-4 py-2 border border-gray-700">Title</th>
+              <th class="px-4 py-2 border border-gray-700">Description</th>
+              <th class="px-4 py-2 border border-gray-700">Release Date</th>
+              <th class="px-4 py-2 border border-gray-700">Duration</th>
+              <th class="px-4 py-2 border border-gray-700">Season Number</th>
+              <th class="px-4 py-2 border border-gray-700">Episode Number</th>
+              <th class="px-4 py-2 border border-gray-700">Series Title</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="item in content" :key="item.id" class="hover:bg-gray-700">
               <td class="px-4 py-2 border border-gray-700">{{ item.title }}</td>
+              <td class="px-4 py-2 border border-gray-700">{{ item.description }}</td>
+              <td class="px-4 py-2 border border-gray-700">{{ item.release_date }}</td>
+              <td class="px-4 py-2 border border-gray-700">{{ item.duration }}</td>
+              <td class="px-4 py-2 border border-gray-700">{{ item.season_number }}</td>
+              <td class="px-4 py-2 border border-gray-700">{{ item.episode_number }}</td>
+              <td class="px-4 py-2 border border-gray-700">{{ item.series_title }}</td>
             </tr>
           </tbody>
         </table>

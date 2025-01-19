@@ -13,13 +13,13 @@ class ContentStoredProcedureSeeder extends Seeder
             DROP PROCEDURE IF EXISTS GetAllSeries;
             CREATE PROCEDURE GetAllSeries()
             BEGIN
-                SELECT * FROM series_with_episodes;
+                SELECT * FROM media WHERE media_type = "EPISODE";
             END;
 
             DROP PROCEDURE IF EXISTS GetAllMovies;
             CREATE PROCEDURE GetAllMovies()
             BEGIN
-                SELECT * FROM movies_with_quality;
+                SELECT * FROM media WHERE media_type = "MOVIE";
             END;
 
             DROP PROCEDURE IF EXISTS GetContentById;

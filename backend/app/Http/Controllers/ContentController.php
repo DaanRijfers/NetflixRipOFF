@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
@@ -14,26 +13,19 @@ class ContentController extends Controller
     public function index(Request $request)
     {
         try {
-            // Fetch series data directly as-is (no need for aggregation)
-            $series = DB::table('series_with_episodes')
-                ->select('series_title', 'total_seasons', 'total_episodes')
-                ->paginate(10); // Optional: Add pagination if needed
+            // Fetch series data using stored procedure
+            $series = DB::select('CALL GetAllSeries()');
 
-            // Fetch movies data with their qualities
-            $movies = DB::table('movies_with_quality')
-                ->select('movie_id', 'movie_title', 'qualities')
-                ->paginate(10);
+            // Fetch movies data using stored procedure
+            $movies = DB::select('CALL GetAllMovies()');
 
-            // Prepare data
-            $data = [
-                'series' => $series,
-                'movies' => $movies,
-            ];
+            // Merge series and movies into a single content array
+            $content = array_merge($series, $movies);
 
             // Use the respond function
-            return $this->respond(['message' => 'Succesfully fetched all content', 'content' => $data], 200, $request);
+            return $this->respond(['message' => 'Successfully fetched all content', 'content' => $content], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
+            return $this->respondWithError('An error has occurred. Please try again later', 500, $request);
         }
     }
 
@@ -41,12 +33,13 @@ class ContentController extends Controller
     public function show(Request $request, $content_id)
     {
         try {
-            $content = Media::findOrFail($content_id);
+            // Fetch specific content using stored procedure
+            $content = DB::select('CALL GetContentById(?)', [$content_id]);
 
             // Use the respond function
-            return $this->respond(['message' => 'Succesfully fetched content', 'content' => $content->toArray()], 200, $request);
+            return $this->respond(['message' => 'Successfully fetched content', 'content' => $content], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
+            return $this->respondWithError('An error has occurred. Please try again later', 500, $request);
         }
     }
 
@@ -54,12 +47,13 @@ class ContentController extends Controller
     public function recommendations(Request $request)
     {
         try {
-            $recommendations = Media::all()->random(5); // Example of random recommendations
+            // Fetch recommendations using stored procedure
+            $recommendations = DB::select('CALL GetRecommendations()');
 
             // Use the respond function
-            return $this->respond(['message' => 'Succesfully fetched reccomendations', 'content' => $recommendations->toArray()], 200, $request);
+            return $this->respond(['message' => 'Successfully fetched recommendations', 'content' => $recommendations], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
+            return $this->respondWithError('An error has occurred. Please try again later', 500, $request);
         }
     }
 
@@ -68,12 +62,13 @@ class ContentController extends Controller
     {
         try {
             $query = $request->get('query');
-            $content = Media::where('title', 'like', "%$query%")->get();
+            // Search content using stored procedure
+            $content = DB::select('CALL SearchContent(?)', [$query]);
 
             // Use the respond function
-            return $this->respond(['message' => 'Succesfully completed search', 'content' => $content->toArray()], 200, $request);
+            return $this->respond(['message' => 'Successfully completed search', 'content' => $content], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
+            return $this->respondWithError('An error has occurred. Please try again later', 500, $request);
         }
     }
 }
