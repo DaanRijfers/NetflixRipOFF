@@ -23,15 +23,19 @@ class SubscriptionStoredProcedureSeeder extends Seeder
             END;
 
             DROP PROCEDURE IF EXISTS CreateSubscription;
-            CREATE PROCEDURE CreateSubscription(IN userId INT, IN plan VARCHAR(255))
+            CREATE PROCEDURE CreateSubscription(IN userId INT, IN plan VARCHAR(255), IN price DECIMAL(10, 2), IN quality VARCHAR(255))
             BEGIN
-                INSERT INTO subscriptions (user_id, plan) VALUES (userId, plan);
+                INSERT INTO subscriptions (user_id, plan, price, quality) VALUES (userId, plan, price, quality);
             END;
 
             DROP PROCEDURE IF EXISTS UpdateSubscription;
             CREATE PROCEDURE UpdateSubscription(IN subscriptionId INT, IN subscriptionData JSON)
             BEGIN
-                UPDATE subscriptions SET plan = JSON_UNQUOTE(JSON_EXTRACT(subscriptionData, "$.plan")) WHERE id = subscriptionId;
+                UPDATE subscriptions 
+                SET plan = JSON_UNQUOTE(JSON_EXTRACT(subscriptionData, "$.plan")),
+                    price = JSON_UNQUOTE(JSON_EXTRACT(subscriptionData, "$.price")),
+                    quality = JSON_UNQUOTE(JSON_EXTRACT(subscriptionData, "$.quality"))
+                WHERE id = subscriptionId;
             END;
 
             DROP PROCEDURE IF EXISTS DeleteSubscription;

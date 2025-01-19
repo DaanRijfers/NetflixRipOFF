@@ -84,12 +84,16 @@
         <table class="min-w-full bg-gray-800 border border-gray-700">
           <thead>
             <tr>
-              <th class="px-4 py-2 border border-gray-700">Name</th>
+              <th class="px-4 py-2 border border-gray-700">Id</th>
+              <th class="px-4 py-2 border border-gray-700">Price</th>
+              <th class="px-4 py-2 border border-gray-700">Quality</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="subscription in subscriptions" :key="subscription.id" class="hover:bg-gray-700">
-              <td class="px-4 py-2 border border-gray-700">{{ subscription.name }}</td>
+              <td class="px-4 py-2 border border-gray-700">{{ subscription.id }}</td>
+              <td class="px-4 py-2 border border-gray-700">{{ subscription.price }}</td>
+              <td class="px-4 py-2 border border-gray-700">{{ subscription.quality }}</td>
             </tr>
           </tbody>
         </table>

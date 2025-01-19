@@ -26,9 +26,11 @@ class SubscriptionController extends Controller
             $request->validate([
                 'user_id' => 'required|exists:users,id',
                 'plan' => 'required|string',
+                'price' => 'required|numeric',
+                'quality' => 'required|string',
             ]);
 
-            DB::statement('CALL CreateSubscription(?, ?)', [$request->user_id, $request->plan]);
+            DB::statement('CALL CreateSubscription(?, ?, ?, ?)', [$request->user_id, $request->plan, $request->price, $request->quality]);
             $subscription = DB::select('CALL GetSubscriptionById(?)', [DB::getPdo()->lastInsertId()]);
             return $this->respond(['message' => 'Subscription created successfully!', 'subscription' => $subscription], 201, $request);
         } catch (\Exception $e) {
