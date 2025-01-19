@@ -4,4 +4,4 @@ log_bin=mysql-bin
 log_error=mysql-bin.err
 relay_log=relay-bin
 report_host=mariadb-replica
-slave-skip-errors = all
+slave-skip-errors=all
