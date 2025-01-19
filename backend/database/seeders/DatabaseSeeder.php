@@ -33,6 +33,12 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($seeders as $table => $seeder) {
+            // Because the .env stores everything as a string, the seeding value is also a string
+            // Typecasting won't work, because PHP sees strings with a lenth more than 0 as TRUE
+            if($_ENV['SEEDING'] == "false") {
+                $this->command->info("Seeding disabled, skipping data seeder");
+                break;
+            }
             if (DB::table($table)->count() === 0) {
                 $this->call($seeder);
                 $this->command->info("Seeded: {$seeder}");

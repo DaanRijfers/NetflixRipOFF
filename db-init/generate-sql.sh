@@ -1,14 +1,22 @@
 #!/bin/sh
 set -ex  # Exit on any error
 
-rm -rfv /db-init/sql-files
+rm -rfv /db-init/config
 
 # Ensure the output directory exists
 mkdir -p /db-init/sql-files/primary
 mkdir -p /db-init/sql-files/replica
+mkdir -p /db-init/config
 
 # Skip loading .env as variables are already set (from Docker environment)
 echo "Using environment variables directly..."
+
+echo "Generating config files from templates..."
+
+cat /db-init/primary.cnf.template | envsubst > /db-init/config/primary.cnf
+cat /db-init/replica.cnf.template | envsubst > /db-init/config/replica.cnf
+
+echo "Finished generating config files"
 
 # Generate and verify the SQL content
 echo "Generating create-users.sql from templates..."

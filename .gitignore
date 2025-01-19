@@ -1,3 +1,4 @@
 .env
 /db-init/sql-files/
+/db-init/config
 node_modules
