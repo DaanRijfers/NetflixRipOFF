@@ -96,14 +96,14 @@ echo "SEEDING value: $SEEDING"
 echo "Running database migrations..."
 php artisan migrate --force || { echo "Migrations failed! Exiting."; exit 1; }
 
-# Conditional seeding
+# Database seeding
 if [ "$SEEDING" = "true" ]; then
     echo "SEEDING is enabled. Running database seeders..."
-    php artisan db:seed --force || { echo "Seeding failed! Exiting."; exit 1; }
-    echo "Database seeders completed."
 else
-    echo "SEEDING is disabled. Skipping database seeders."
+    echo "SEEDING is disabled. Only seeding procedures and views"
 fi
+php artisan db:seed --force || { echo "Seeding failed! Exiting."; exit 1; }
+
 
 echo "Revoking database permissions..."
 php artisan db:seed --class=GrantRevokePermissionsSeeder 

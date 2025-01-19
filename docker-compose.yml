@@ -35,7 +35,7 @@ services:
     healthcheck:
       test: ["CMD", "test", "-f", "/db-init/sql-files/primary/create-users.sql"]
       interval: 5s
-      retries: 5
+      retries: 10
       
   mariadb:
     image: mariadb:10.11 
