@@ -23,7 +23,7 @@ abstract class Controller
     }
 
     // Helper function to respond with error
-    protected function respondWithError(int $status, Request $request)
+    protected function respondWithError(String $message, int $status, Request $request)
     {
         $message = $this->handleError($status);
         return $this->respond(['message' => $message, 'error' => $message], $status, $request);

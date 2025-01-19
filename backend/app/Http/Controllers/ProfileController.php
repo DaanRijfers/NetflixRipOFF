@@ -31,7 +31,7 @@ class ProfileController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondWithError(422, $request, $validator->errors()->toArray());
+                return $this->respondWithError('Incorrect input provided', 422, $request);
             }
 
             // Handle profile picture (can be a URL, base64 or null)
@@ -49,8 +49,7 @@ class ProfileController extends Controller
             $profile['profile_picture'] = url("/api/profile/" . $profile->id . "/picture");
             return $this->respond(['message' => 'Profile created successfully!', 'profile' => $profile], 201, $request);
         } catch (\Exception $e) {
-            die($e);
-            return $this->respondWithError(500, $request, $e->getMessage());
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -62,7 +61,7 @@ class ProfileController extends Controller
             $profile['profile_picture'] = url("/api/profile/" . $profile->id . "/picture");
             return $this->respond(['message' => 'Profile fetched successfully!', 'profile' => $profile], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(404, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -80,7 +79,7 @@ class ProfileController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondWithError(422, $request, $validator->errors());
+                return $this->respondWithError('Incorrect input provided', 422, $request);
             }
 
             // Handle profile picture (can be a URL or base64)
@@ -97,7 +96,7 @@ class ProfileController extends Controller
             $profile['profile_picture'] = url("/api/profile/" . $profile->id . "/picture");
             return $this->respond(['message' => 'Profile updated successfully!', 'profile' => $profile], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request, $e->getMessage());
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -137,10 +136,7 @@ class ProfileController extends Controller
 
             return $this->respond(['message' => 'Profiles fetched successfully!', 'profiles' => $profiles], 200, $request);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Internal Server Error',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -156,7 +152,7 @@ class ProfileController extends Controller
 
             return $this->respond(['message' => 'Favorite content fetched successfully!', 'favoriteContent' => $favoriteContent], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -169,7 +165,7 @@ class ProfileController extends Controller
 
             return $this->respond(['message' => 'Profile with genres fetched successfully!', 'profile' => $profile], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -183,7 +179,7 @@ class ProfileController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondWithError(422, $request, $validator->errors());
+                return $this->respondWithError('Incorrect input provided', 422, $request);
             }
 
             // Find the profile
@@ -194,7 +190,7 @@ class ProfileController extends Controller
 
             return $this->respond(['message' => 'Genre preference added successfully!'], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -208,7 +204,7 @@ class ProfileController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondWithError(422, $request, $validator->errors());
+                return $this->respondWithError('Incorrect input provided', 422, $request);
             }
 
             // Find the profile
@@ -219,7 +215,7 @@ class ProfileController extends Controller
 
             return $this->respond(['message' => 'Genre preference removed successfully!'], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->response('An error has occured. Please try again later', 500, $requestu);
         }
     }
     
@@ -231,7 +227,7 @@ class ProfileController extends Controller
             $profilePictureBinary = $profile->profile_picture;
     
             if (!$profilePictureBinary) {
-                return response()->json(['error' => 'Profile picture not found'], 404);
+                return $this->response('Unable to locate profile picture', 404, $requestu);
             }
     
             // Initialize FileInfo and get MIME type
@@ -241,7 +237,7 @@ class ProfileController extends Controller
             return response($profilePictureBinary, 200)
                 ->header('Content-Type', $mimeType);
         } catch (\Throwable $th) {
-            return $this->respond(['error' => 'Server error', 'message' => $th->getMessage()], 500, $request);
+            return $this->response('An error has occured. Please try again later', 500, $requestu);
         }
     }
     

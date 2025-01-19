@@ -25,7 +25,7 @@ class AuthController extends Controller
 
         $data = $request->all();
         if ($data['password'] !== $data['confirmPassword']) {
-            return $this->respond(['message' => 'The confirm password field does not match.'], 422, $request);
+            return $this->respondWithError('The confirm password field does not match.', 422, $request);
         }
 
         $email = $request->input('email');
@@ -53,12 +53,12 @@ class AuthController extends Controller
             if ($user) {
                 $user->increment('failed_login_attempts');
                 if ($user->failed_login_attempts >= 3) {
-                    return $this->respond(['message' => 'Account locked. Please reset your password.'], 423, $request);
+                    return $this->respondWithError('Account locked. Please reset your password.', 423, $request);
                 }
                 $user->save();
             }
 
-            return $this->respond(['message' => 'Invalid credentials'], 401, $request);
+            return $this->respondWithError('Invalid credentials', 401, $request);
         }
 
         $user = auth('api')->user();
