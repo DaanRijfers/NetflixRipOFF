@@ -4,6 +4,7 @@ services:
     container_name: sql-generator
     volumes:
       - ./db-init:/db-init:z
+      - ./mariadb:/mariadb:z
     working_dir: /db-init
     environment:
       - MYSQL_DATABASE=${DB_NAME}
@@ -18,6 +19,7 @@ services:
       rm -rfv /db-init/sql-files;
       apk update && apk add dos2unix gettext mariadb-client &&  
       echo 'Listing /db-init directory:'; ls -l /db-init && 
+      dos2unix /mariadb/*; 
       if [ -f /db-init/generate-sql.sh ]; then 
         echo 'Converting generate-sql.sh to Unix line endings...'; 
         dos2unix /db-init/generate-sql.sh;  

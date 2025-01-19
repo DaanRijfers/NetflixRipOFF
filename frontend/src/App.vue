@@ -31,6 +31,7 @@ export default {
   data() {
     return {
       isLoggedIn: false, // Initialize as false
+      userRole: null,
     };
   },
   created() {
@@ -39,15 +40,17 @@ export default {
   },
   methods: {
     checkLoginStatus() {
-      // Check if a token exists in localStorage
       this.isLoggedIn = !!localStorage.getItem('token');
-      console.log('isLoggedIn:', this.isLoggedIn); // Debugging
+      this.userRole = localStorage.getItem('role'); // Retrieve the user's role
+      console.log('isLoggedIn:', this.isLoggedIn, 'Role:', this.userRole); // Debugging
     },
-    handleLoginSuccess() {
-      this.isLoggedIn = true; // Update isLoggedIn when login is successful
+    handleLoginSuccess(role) {
+      this.isLoggedIn = true;
+      this.userRole = role; // Set the user's role on successful login
     },
     handleLogoutSuccess() {
-      this.isLoggedIn = false; // Update isLoggedIn when logout is successful
+      this.isLoggedIn = false;
+      this.userRole = null; // Clear the user's role on logout
     },
   },
   beforeUnmount() {

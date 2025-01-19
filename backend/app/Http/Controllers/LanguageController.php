@@ -8,19 +8,13 @@ use App\Models\Language;
 class LanguageController extends Controller
 {
     // Get all languages
-    public function index()
+    public function index(Request $request)
     {
         try {
             $languages = Language::all();
-            return response()->json([
-                'message' => 'Languages fetched successfully!',
-                'languages' => $languages,
-            ], 200);
+            return $this->respond(['message' => 'Languages fetched successfully!', 'languages' => $languages], 200, $request);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to fetch languages!',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 }

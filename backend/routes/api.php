@@ -14,7 +14,6 @@ use App\Http\Middleware\JwtMiddleware;
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware(JwtMiddleware::class);
-Route::post('/auth/password-reset', [AuthController::class, 'resetPassword']); // Password reset route
 
 // User Routes
 Route::middleware(JwtMiddleware::class)->group(function () {

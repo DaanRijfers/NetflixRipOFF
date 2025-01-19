@@ -23,10 +23,7 @@ class UserInvitationsStoredProcedureSeeder extends Seeder
                 INSERT INTO user_invitations(invite_user_id, invitee_user_id)
                 VALUES (InviteUserId, InviteeUserId);
             END;
-        ");
-
-        // Marks invitation as completed
-        DB::unprepared("
+            
             DROP PROCEDURE IF EXISTS MarkInvitationAsCompleted;
             CREATE PROCEDURE MarkInvitationAsCompleted(
                 IN InviteUserId bigint(20),

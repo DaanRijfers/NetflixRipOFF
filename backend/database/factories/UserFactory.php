@@ -22,7 +22,7 @@ class UserFactory extends Factory
     {
         return $this->state([
             'email' => 'admin@admin.com',
-            'role' => 'senior'
+            'role' => 'admin'
         ]);
     }
 
@@ -30,7 +30,7 @@ class UserFactory extends Factory
     {
         return $this->state([
             'email' => 'noreply@admin.com',
-            'role' => 'system'
+            'role' => 'user'
         ]);
     }
 }

@@ -23,10 +23,7 @@ class WatchlistStoredProcedureSeeder extends Seeder
                 INSERT INTO watchlist(profile_id, media_id)
                 VALUES (profileId, mediaId);
             END;
-        ");
 
-        // Remove item from watchlist
-        DB::unprepared("
             DROP PROCEDURE IF EXISTS removeWatchlist;
             CREATE PROCEDURE removeWatchlist(
                 IN profileId bigint(20), 

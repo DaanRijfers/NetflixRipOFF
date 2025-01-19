@@ -33,7 +33,7 @@ class ContentController extends Controller
             // Use the respond function
             return $this->respond(['message' => 'Succesfully fetched all content', 'content' => $data], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -46,7 +46,7 @@ class ContentController extends Controller
             // Use the respond function
             return $this->respond(['message' => 'Succesfully fetched content', 'content' => $content->toArray()], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -59,7 +59,7 @@ class ContentController extends Controller
             // Use the respond function
             return $this->respond(['message' => 'Succesfully fetched reccomendations', 'content' => $recommendations->toArray()], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -73,7 +73,7 @@ class ContentController extends Controller
             // Use the respond function
             return $this->respond(['message' => 'Succesfully completed search', 'content' => $content->toArray()], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 }

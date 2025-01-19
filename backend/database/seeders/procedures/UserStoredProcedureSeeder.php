@@ -47,10 +47,7 @@ class UserStoredProcedureSeeder extends Seeder
                 DELETE FROM users 
                 WHERE id = userId;
             END;
-        ");
 
-        // Increment failed_login_attempts by user ID
-        DB::unprepared("
             DROP PROCEDURE IF EXISTS IncrementFailedLoginUser;
             CREATE PROCEDURE IncrementFailedLoginUser(
                 IN userId bigint(20)
@@ -60,10 +57,7 @@ class UserStoredProcedureSeeder extends Seeder
                 SET failed_login_attempts = users.failed_login_attempts + 1 
                 WHERE id = userId;
             END;
-        ");
 
-        // Updates property of user by column name
-        DB::unprepared("
             DROP PROCEDURE IF EXISTS UpdateUserProperty;
             CREATE PROCEDURE UpdateUserProperty(
                 IN userId bigint(20), 
@@ -76,19 +70,13 @@ class UserStoredProcedureSeeder extends Seeder
                 EXECUTE stmt USING newValue, userId;
                 DEALLOCATE PREPARE stmt;
             END;
-        ");
 
-        // Get all users
-        DB::unprepared("
             DROP PROCEDURE IF EXISTS GetAllUsers;
             CREATE PROCEDURE GetAllUsers()
             BEGIN
                 SELECT * FROM users;
             END;
-        ");
 
-        // Get user by ID
-        DB::unprepared("
             DROP PROCEDURE IF EXISTS GetUserById;
             CREATE PROCEDURE GetUserById(
                 IN userId INT
@@ -97,19 +85,16 @@ class UserStoredProcedureSeeder extends Seeder
                 SELECT * FROM users 
                 WHERE id = userId;
             END;
-        ");
 
-        // Update user
-        DB::unprepared("
             DROP PROCEDURE IF EXISTS UpdateUser;
             CREATE PROCEDURE UpdateUser(
-            IN userId INT, 
-            IN userData JSON
+                IN userId INT, 
+                IN userData JSON
             )
             BEGIN
-            UPDATE users 
-            SET email = JSON_UNQUOTE(JSON_EXTRACT(userData, '$.email')) 
-            WHERE id = userId;
+                UPDATE users 
+                SET email = JSON_UNQUOTE(JSON_EXTRACT(userData, '$.email')) 
+                WHERE id = userId;
             END;
         ");
     }

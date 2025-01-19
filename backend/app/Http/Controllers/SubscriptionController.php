@@ -15,7 +15,7 @@ class SubscriptionController extends Controller
             $subscriptions = DB::select('CALL GetAllSubscriptions()');
             return $this->respond(['message' => 'Successfully fetched subscriptions', 'subscriptions' => $subscriptions], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -32,7 +32,7 @@ class SubscriptionController extends Controller
             $subscription = DB::select('CALL GetSubscriptionById(?)', [DB::getPdo()->lastInsertId()]);
             return $this->respond(['message' => 'Subscription created successfully!', 'subscription' => $subscription], 201, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -44,7 +44,7 @@ class SubscriptionController extends Controller
             $subscription = DB::select('CALL GetSubscriptionById(?)', [$subscription_id]);
             return $this->respond(['message' => 'Subscription updated successfully!', 'subscription' => $subscription], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -55,7 +55,7 @@ class SubscriptionController extends Controller
             DB::statement('CALL DeleteSubscription(?)', [$subscription_id]);
             return $this->respond(['message' => 'Subscription deleted successfully!'], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 }

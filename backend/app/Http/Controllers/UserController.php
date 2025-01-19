@@ -16,7 +16,7 @@ class UserController extends Controller
             $users = DB::select('CALL GetAllUsers()');
             return $this->respond(['message' => 'Users fetched successfully!', 'users' => $users], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -27,7 +27,7 @@ class UserController extends Controller
             $user = DB::select('CALL GetUserById(?)', [$user_id]);
             return $this->respond(['message' => 'User fetched successfully!', 'user' => $user], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(404, $request);
+            return $this->respondWithError('Unable to locate user', 404, $request);
         }
     }
 
@@ -39,7 +39,7 @@ class UserController extends Controller
             $user = DB::select('CALL GetUserById(?)', [$user_id]);
             return $this->respond(['message' => 'User updated successfully!', 'user' => $user], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -50,7 +50,7 @@ class UserController extends Controller
             DB::statement('CALL DeleteUser(?)', [$user_id]);
             return $this->respond(['message' => 'User deleted successfully!'], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -60,16 +60,16 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($user_id);
             if($user->subscription_id != null) {
-                return $this->respondWithError(405, $request);
+                return $this->respondWithError('Unable to locate user', 405, $request);
             }
             if(!Subscription::where('id', '=', $subscription_id)) {
-                return $this->respondWithError(404, $request);
+                return $this->respondWithError('Unable to locate user', 404, $request);
             }
             $user->subscription_id = $subscription_id;
             $user->save();
             return $this->respond(['message' => 'User subscription updated successfully!'], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -88,7 +88,7 @@ class UserController extends Controller
             $user->save();
             return $this->respond(['message' => 'User subscription updated successfully!'], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 
@@ -104,7 +104,7 @@ class UserController extends Controller
             $user->save();
             return $this->respond(['message' => 'User subscription unassigned successfully!'], 200, $request);
         } catch (\Exception $e) {
-            return $this->respondWithError(500, $request);
+            return $this->respondWithError('An error has occured. Please try again later', 500, $request);
         }
     }
 }
