@@ -1,39 +1,38 @@
-# NetflixRipOFF Docker Setup
+# How to Open and Read the Provided Diagrams
 
-This repository contains the setup for running MariaDB and phpMyAdmin in Docker containers for the NetflixRipOFF project.
+The uploaded diagrams are in different formats, requiring specific tools to view and edit. Follow these steps to access and interpret each diagram:
 
-## Prerequisites
+---
 
-- Docker
-- Docker Compose
+## 1. API Class Diagram (.asta)
+**File:** `API_Class_Diagram_1.0.asta`  
+- **Tool Required:** Astah Professional or Astah UML (Unified Modeling Language).  
+- **How to Open:**
+  1. Download and install Astah Professional or Astah UML from the [official Astah website](https://astah.net/).
+  2. Open Astah, and go to **File > Open**.
+  3. Locate and select the `API_Class_Diagram_1.0.asta` file.  
+- **Purpose:** This diagram visually represents the API's class structure, including relationships, methods, and attributes for better understanding of the system's architecture.
 
-## Getting Started
+---
 
-1. Clone this repository:
+## 2. ERD (Entity-Relationship Diagram) (.drawio)
+**File:** `ERD_NETFLIXRIPOFF.drawio`  
+- **Tool Required:** Draw.io (now known as diagrams.net) or any compatible tool.  
+- **How to Open:**
+  1. Visit the [Diagrams.net website](https://app.diagrams.net/) or download the desktop app.
+  2. Open the application, and click **File > Open from Device**.
+  3. Locate and select the `ERD_NETFLIXRIPOFF.drawio` file.  
+- **Purpose:** The ERD depicts the database schema for the NetflixRipOFF project. It showcases tables, their relationships, and attributes, providing a clear overview of how data is structured.
 
-   ```bash
-   git clone https://github.com/DaanRijfers/NetflixRipOFF.git
-   cd NetflixRipOFF
-   ```
+---
 
-2. Ensure that Docker and Docker Compose are installed. You can install them following the official guides:
+## 3. Route Diagram (.drawio)
+**File:** `Route diagram.drawio`  
+- **Tool Required:** Draw.io (diagrams.net) or any compatible tool.  
+- **How to Open:**
+  1. Visit the [Diagrams.net website](https://app.diagrams.net/) or download the desktop app.
+  2. Open the application, and click **File > Open from Device**.
+  3. Locate and select the `Route diagram.drawio` file.  
+- **Purpose:** This diagram explains the routing logic in the NetflixRipOFF project, detailing how API requests are handled and directed through the system.
 
-   - [Install Docker](https://docs.docker.com/get-docker/)
-   - [Install Docker Compose](https://docs.docker.com/compose/install/)
-
-3. Once you have Docker and Docker Compose set up, run the following command to start the containers:
-
-   ```bash
-   docker-compose up -d
-   ```
-
-   This will start the MariaDB and phpMyAdmin containers in the background.
-
-4. Access phpMyAdmin via your browser at `http://localhost:8080`.
-
-## Stopping the Containers
-
-If you want to stop the containers, run:
-
-```bash
-docker-compose down
+---
