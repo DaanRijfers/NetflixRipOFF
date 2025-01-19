@@ -1,41 +1,125 @@
-version: "3.9"
-
 services:
-  mariadb:
-    image: mariadb:latest
-    container_name: netflixripoff-mariadb
-    platform: linux/amd64  # Ensure compatibility for both amd64 and arm64
+  sql-generator:
+    image: alpine:latest
+    container_name: sql-generator
+    volumes:
+      - ./db-init:/db-init:z
+      - ./mariadb:/mariadb:z
+    working_dir: /db-init
     environment:
-      MYSQL_ROOT_PASSWORD: P@ssword123!
-      MYSQL_DATABASE: netflixripoff
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      - DB_HOST=${DB_HOST}
+      - REPLICATION_USER=${REPLICATION_USER}
+      - REPLICATION_PASSWORD=${REPLICATION_PASSWORD}
+      - REPLICATION_DELAY=${REPLICATION_DELAY}
+    entrypoint: /bin/sh -c "
+      rm -rfv /db-init/sql-files;
+      apk update && apk add dos2unix gettext mariadb-client &&  
+      echo 'Listing /db-init directory:'; ls -l /db-init && 
+      dos2unix /mariadb/*; 
+      if [ -f /db-init/generate-sql.sh ]; then 
+        echo 'Converting generate-sql.sh to Unix line endings...'; 
+        dos2unix /db-init/generate-sql.sh;  
+        echo 'Making generate-sql.sh executable...'; 
+        chmod +x /db-init/generate-sql.sh;  
+        echo 'Checking script permissions:'; ls -l /db-init/generate-sql.sh; 
+        echo 'Running SQL generation script...'; 
+        /bin/sh -x /db-init/generate-sql.sh;  
+        echo 'SQL file generated successfully!'; 
+      else 
+        exit 1; 
+      fi"
+    healthcheck:
+      test: ["CMD", "test", "-f", "/db-init/sql-files/primary/create-users.sql"]
+      interval: 5s
+      retries: 10
+      
+  mariadb:
+    image: mariadb:10.11 
+    container_name: mariadb
+    depends_on:
+      sql-generator:
+        condition: service_healthy
     ports:
       - "3306:3306"
-    volumes:
-      - mariadb-data:/var/lib/mysql
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    container_name: netflixripoff-phpmyadmin
-    platform: linux/amd64  # Ensure compatibility for both amd64 and arm64
-    ports:
-      - "8080:80"
     environment:
-      PMA_HOST: mariadb
-      MYSQL_ROOT_PASSWORD: P@ssword123!
-    depends_on:
-      - mariadb
-
-  apache:
-    image: httpd:latest  # Use official Apache HTTP server image
-    container_name: netflixripoff-apache
-    platform: linux/amd64  # Ensure compatibility for both amd64 and arm64
-    ports:
-      - "80:80"   # Expose port 80 for web access
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
     volumes:
-      - ./www:/usr/local/apache2/htdocs/  # Map local 'www' folder to Apache's web directory
+      - mariadb-data:/var/lib/mysql:z
+      - ./db-init/sql-files/primary/:/docker-entrypoint-initdb.d/:z
+      - ./db-init/config/primary.cnf:/etc/mysql/conf.d/primary.cnf:z
+      - ./mariadb/entrypoint-primary.sh:/usr/local/bin/entrypoint.sh:z
+    entrypoint: ["/bin/bash", "/usr/local/bin/entrypoint.sh"]
+
+  mariadb-replica:
+    image: mariadb:10.11 
+    container_name: mariadb-replica
     depends_on:
       - mariadb
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_PASSWORD=${REPLICATION_PASSWORD}
+      - MYSQL_USER=${REPLICATION_USER}
+      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
+    volumes:
+      - mariadb-replica:/var/lib/mysql:z
+      - ./db-init/sql-files/replica/:/docker-entrypoint-initdb.d/:z
+      - ./db-init/config/replica.cnf:/etc/mysql/conf.d/replica.cnf:z
+      - ./mariadb/entrypoint-replica.sh:/usr/local/bin/entrypoint.sh:z
+    entrypoint: ["/bin/bash", "/usr/local/bin/entrypoint.sh"]
+
+  laravel:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: laravel-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/var/www/html:z  # Mount the backend directory
+      - ./.env:/var/www/.env:z 
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_NAME}
+      - DB_USERNAME=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - UNSPLASH_ACCESS_KEY=${UNSPLASH_ACCESS_KEY}
+
+  vuejs:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vue-frontend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend:/app:z         # Corrected with :z
+      - /app/node_modules         # No :z needed since this is an internal container directory
+    command: npm run serve
+
+# For debugging purposes you can use the phpmyadmin container.
+# To use this container remove the comment in front of it (#)
+# Make sure the indents are correct otherwise it will not work you can see the indents of the containers above.
+
+  #phpmyadmin:
+  #  image: phpmyadmin/phpmyadmin:latest
+  #  container_name: phpmyadmin
+  #  environment:
+  #    PMA_HOST: mariadb
+  #  ports:
+  #    - "8081:80"
+  #  depends_on:
+  #    - mariadb
 
 volumes:
   mariadb-data:
-
+  mariadb-replica:
