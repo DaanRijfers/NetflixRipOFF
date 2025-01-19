@@ -41,9 +41,6 @@ Route::middleware(JwtMiddleware::class)->group(function () {
     Route::get('/languages', [LanguageController::class, 'index']);
 });
 
-// Auth Profile Route
-Route::middleware('auth:api')->get('/auth/profile', [AuthController::class, 'profile']); // Use /auth/profile
-
 // User Profile Routes
 Route::middleware(JwtMiddleware::class)->group(function () {
     // Get the profile of the currently authenticated user

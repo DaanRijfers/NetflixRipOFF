@@ -72,6 +72,19 @@ else
     echo "APP_KEY already exists and is not empty."
 fi
 
+# Step 3: Ensure JWT_SECRET exists and is not empty
+if ! grep -q "^JWT_SECRET=.*" /var/www/html/.env || grep -q "^JWT_SECRET=$" /var/www/html/.env; then
+    echo "JWT_SECRET is missing or empty. Generating a new JWT secret..."
+    php artisan jwt:secret --force || { echo "JWT secret generation failed! Exiting."; exit 1; }
+    echo "JWT secret generated successfully."
+else
+    echo "JWT_SECRET already exists and is not empty."
+fi
+
+# Debug: Verify JWT_SECRET in .env
+echo "Checking JWT_SECRET in .env file:"
+grep "^JWT_SECRET=" /var/www/html/.env
+
 # Clear and cache configuration
 echo "Clearing and caching configuration..."
 php artisan config:clear && php artisan config:cache || { echo "Configuration caching failed! Exiting."; exit 1; }
@@ -103,7 +116,6 @@ else
     echo "SEEDING is disabled. Only seeding procedures and views"
 fi
 php artisan db:seed --force || { echo "Seeding failed! Exiting."; exit 1; }
-
 
 echo "Revoking database permissions..."
 php artisan db:seed --class=GrantRevokePermissionsSeeder 

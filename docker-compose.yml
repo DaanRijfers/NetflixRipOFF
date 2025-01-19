@@ -106,15 +106,19 @@ services:
       - /app/node_modules         # No :z needed since this is an internal container directory
     command: npm run serve
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    container_name: phpmyadmin
-    environment:
-      PMA_HOST: mariadb
-    ports:
-      - "8081:80"
-    depends_on:
-      - mariadb
+# For debugging purposes you can use the phpmyadmin container.
+# To use this container remove the comment in front of it (#)
+# Make sure the indents are correct otherwise it will not work you can see the indents of the containers above.
+
+  #phpmyadmin:
+  #  image: phpmyadmin/phpmyadmin:latest
+  #  container_name: phpmyadmin
+  #  environment:
+  #    PMA_HOST: mariadb
+  #  ports:
+  #    - "8081:80"
+  #  depends_on:
+  #    - mariadb
 
 volumes:
   mariadb-data:

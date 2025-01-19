@@ -2,3 +2,5 @@
 /db-init/sql-files/
 /db-init/config
 node_modules
+/backup/backup-images/
+/Tests/api_responses.txt

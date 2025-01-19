@@ -1,72 +1,200 @@
 # NetflixRipOFF Docker Setup
 
-This repository contains the setup for running MariaDB and phpMyAdmin in Docker containers for the NetflixRipOFF project.
+Welcome to the NetflixRipOFF Docker setup guide. This repository contains everything you need to run MariaDB and phpMyAdmin in Docker containers for your project.
 
 ## Prerequisites
 
-- Docker
-- Docker Compose
+To get started, ensure you have the following installed on your system:
+
+- **Docker**: Install Docker by following the official guide [here](https://docs.docker.com/get-docker/).
+- **Docker Compose**: Install Docker Compose from [here](https://docs.docker.com/compose/install/).
 
 ## Getting Started
 
-1. Clone this repository:
+1. **Clone the Repository**:
 
+   ```bash
    git clone https://github.com/DaanRijfers/NetflixRipOFF.git
    cd NetflixRipOFF
+   ```
 
-2. Ensure that Docker and Docker Compose are installed. You can install them following the official guides:
+2. **Set Up Environment Variables**:
 
-   - Install Docker: https://docs.docker.com/get-docker/
-   - Install Docker Compose: https://docs.docker.com/compose/install/
+   Duplicate and rename `.envExample` to `.env`. Ensure that all values in `.env` are unique, especially usernames.(The replica and default user cannot an should not be the same name)
 
-3. Copy and rename the .envExample file to .env:
-
+   ```bash
    cp .envExample .env
+   ```
 
-   Important: Ensure that the values inside the .env file are unique, especially the usernames. Users should not have the same name.
+3. **Start Docker Containers**:
 
-4. Once you have Docker and Docker Compose set up, run the following command to start the containers:
+   Start the containers using Docker Compose:
 
+   ```bash
+   docker-compose up
+   ```
+
+   Headless:   
+   ```bash
    docker-compose up -d
+   ```
 
-   This will start the MariaDB and phpMyAdmin containers in the background.
+   This command runs MariaDB, Vue, and Laravel containers in the background.
 
 ## Stopping the Containers
 
-If you want to stop the containers, run:
+To stop the containers, run:
 
+```bash
 docker-compose down
+```
+
+To delete all volumes and data along with stopping the containers:
+
+```bash
+docker-compose down -v
+```
 
 ## Backing Up a Docker Container
 
-To back up a Docker container, you can follow these steps:
+To back up a Docker container, follow these steps:
 
-1. Commit the Container to an Image:
+1. **Run Backup Script (Optional)**:
 
-   First, commit the container to a new Docker image. Replace <container_name> with the name or ID of your container and <backup_image_name> with a name for your backup image.
+   Navigate to the `backup` folder and run:
 
-   docker commit <container_name> <backup_image_name>
+   ```bash
+   cd backup
+   ./backup.sh
+   ```
 
-2. Save the Image to a Tar File:
+   This script backs up all containers with timestamps for easy management.
 
-   Next, save the Docker image to a tar file for easy storage and transfer. Replace <backup_image_name> with the name of your backup image and <backup_file_name> with the desired name for your backup file.
+2. **Manual Backup**:
 
-   docker save -o <backup_file_name>.tar <backup_image_name>
+   - **Commit the Container to an Image**:
 
-3. Restore the Backup:
+     ```bash
+     docker commit <container_name> <backup_image_name>
+     ```
 
-   To restore the backup, load the image from the tar file:
+   - **Save the Image to a Tar File**:
 
+     ```bash
+     docker save -o <backup_file_name>.tar <backup_image_name>
+     ```
+
+3. **Restore Backup**:
+
+   Load the image from the tar file:
+
+   ```bash
    docker load -i <backup_file_name>.tar
+   ```
 
-   Then, you can create a new container from the restored image.
+## Testing
+
+### API Testing (Curl)
+
+1. **Navigate to the Tests Folder**:
+
+   ```bash
+   cd Tests
+   ```
+
+2. **Run the API Tests**:
+
+   Make sure `test_api.sh` is executable:
+
+   ```bash
+   ./test_api.sh
+   ```
+   If not executable:
+
+   ```bash
+   chmod +x test_api.sh
+   ```
+
+   This script automates sending requests to the API and saves responses in `api_responses.txt`.
+
+### API Testing (Postman)
+
+1. **Open Postman**:
+
+   Download and open Postman from [here](https://www.postman.com/downloads/).
+
+2. **Create a Workspace**:
+
+   Before importing the test collection, create a workspace in Postman:
+   - Open Postman.
+   - Click on **Workspaces** in the top-left corner.
+   - Choose **Create Workspace**, name it, and save.
+
+3. **Import the Collection**:
+
+   - Click **Import** and select `DataProsessingTest.json` from the Tests folder.
+
+4. **Run the Tests**:
+
+   - Open the imported collection.
+   - Click **Run** to execute all requests and review responses.
+
+---
+
+### **What the Tests Cover**
+
+The `test_api.sh` script and Postman collection (`DataProsessingTest.json`) cover the following scenarios:
+
+#### **API Component Testing**:
+- **User Registration**: Tests the `/auth/register` endpoint to ensure it successfully registers a user.
+- **User Login**: Tests the `/auth/login` endpoint and verifies that an authentication token is returned.
+- **Protected Routes**: Ensures endpoints like `/profile` and `/content` require valid authentication tokens.
+- **Profile Management**: Tests creating, fetching, and updating user profiles.
+- **Content and Subscriptions**: Verifies fetching content and subscription data.
+
+#### **Integration Testing**:
+- **Authentication Flow**: Tests the interaction between registration, login, and logout endpoints.
+- **Profile Creation and Fetching**: Verifies the process of creating a profile and retrieving it afterward.
+- **Token Validation**: Ensures protected routes are inaccessible without valid tokens.
+
+#### **Postman-Specific Tests**:
+The Postman collection includes additional validations for:
+- **Request Body Structure**: Ensures the request body matches expected formats and values.
+- **Response Validation**: Validates fields like `email`, `message`, and `access_token` in the response.
+- **Error Handling**: Tests invalid requests, such as expired tokens or missing fields, and verifies proper error responses.
+- **Token Expiry**: Checks whether the token expiry is handled correctly.
+- **Email Validation**: Ensures that the returned email matches the expected format.
+
+---
+
+## Additional Docker Commands
+
+- **Build without Cache**:
+
+  ```bash
+  docker-compose build --no-cache
+  ```
+
+- **Restart Docker**:
+
+  ```bash
+  docker-compose restart
+  ```
+
+- **Show Running Containers**:
+
+  ```bash
+  docker ps
+  ```
 
 ## Additional Notes
 
-- Ensure that your .env file is correctly configured before starting the containers.
-- Regularly back up your data to prevent loss in case of container failure or accidental deletion.
+- Double-check `.env` configuration before starting containers.
+- Regularly back up data to prevent loss.
+- Ensure API is running before executing tests.
+- Use `api_responses.txt` and Postman results for debugging and improvements.
 
-For more information on Docker and Docker Compose, refer to the official documentation:
+For more detailed information, refer to Docker and Docker Compose documentation:
 
 - Docker Documentation: https://docs.docker.com/
 - Docker Compose Documentation: https://docs.docker.com/compose/
